@@ -15,7 +15,8 @@ import {
   getReleaseDownloadUrl,
   getReleaseFileHash,
   getReleaseMimeType,
-  getReleaseOpenWrtVersion
+  getReleaseOpenWrtVersion,
+  findAlternativeReleases
 } from '../../utils/releaseUtils';
 import Button from '../common/Button';
 import Card, { CardHeader, CardContent } from '../common/Card';
@@ -25,8 +26,10 @@ const DownloadPage = () => {
   const navigate = useNavigate();
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
+  const [showAllAlternatives, setShowAllAlternatives] = useState(false);
 
   const release = releases.find(r => r.id === releaseId);
+  const alternativeReleases = release ? findAlternativeReleases(releases, release) : [];
 
   if (!release) {
     return (
@@ -58,6 +61,9 @@ const DownloadPage = () => {
   const fileHash = getReleaseFileHash(release);
   const mimeType = getReleaseMimeType(release);
   const openWrtVersion = getReleaseOpenWrtVersion(release);
+  
+  // Extract filename from download URL
+  const filename = downloadUrl ? downloadUrl.split('/').pop() : 'downloaded-file.ipk';
 
   const handleDownload = () => {
     if (downloadUrl) {
@@ -128,13 +134,92 @@ const DownloadPage = () => {
                     <li>Download the package file (.ipk) to your computer</li>
                     <li>Connect to your router via SSH</li>
                     <li>Upload the package file to the router</li>
-                    <li>Run: <code>opkg install tollgate-core-*.ipk</code></li>
+                    <li>Run: <code>opkg install {filename}</code></li>
                     <li>Configure the service as needed</li>
                   </>
                 )}
               </InstructionsList>
             </CardContent>
           </InstallationCard>
+
+          {alternativeReleases.length > 0 && (
+            <AlternativesCard>
+              <CardHeader>
+                <h3>
+                  {productType === 'tollgate-os' ? 'Other Devices' : 'Other Architectures'}
+                </h3>
+                <AlternativeCount>
+                  {alternativeReleases.length} other {alternativeReleases.length === 1 ? 'variant' : 'variants'} available
+                </AlternativeCount>
+              </CardHeader>
+              <CardContent>
+                <AlternativesContainer>
+                  <AlternativesList $showAll={showAllAlternatives}>
+                    <AlternativesHeader>
+                      <AlternativeHeaderCell width="40%">
+                        {productType === 'tollgate-os' ? 'Device' : 'Architecture'}
+                      </AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="25%">Date</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="25%">Channel</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="10%">Action</AlternativeHeaderCell>
+                    </AlternativesHeader>
+                    
+                    {(showAllAlternatives ? alternativeReleases : alternativeReleases.slice(0, 3)).map((altRelease) => (
+                      <AlternativeRow
+                        key={altRelease.id}
+                        onClick={() => navigate(`/download/${altRelease.id}`)}
+                      >
+                        <AlternativeCell width="40%">
+                          <AlternativeMainInfo>
+                            {productType === 'tollgate-os' ? getReleaseDeviceId(altRelease) : getReleaseArchitecture(altRelease)}
+                          </AlternativeMainInfo>
+                        </AlternativeCell>
+                        
+                        <AlternativeCell width="25%">
+                          <AlternativeDate>{getReleaseDate(altRelease)}</AlternativeDate>
+                        </AlternativeCell>
+                        
+                        <AlternativeCell width="25%">
+                          <AlternativeChannelBadge $color={getChannelColor(getReleaseChannel(altRelease))}>
+                            {getReleaseChannel(altRelease)}
+                          </AlternativeChannelBadge>
+                        </AlternativeCell>
+                        
+                        <AlternativeCell width="10%">
+                          <AlternativeDownloadButton
+                            variant="primary"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const url = getReleaseDownloadUrl(altRelease);
+                              if (url) window.open(url, '_blank');
+                            }}
+                            disabled={!getReleaseDownloadUrl(altRelease)}
+                          >
+                            Download
+                          </AlternativeDownloadButton>
+                        </AlternativeCell>
+                      </AlternativeRow>
+                    ))}
+                    
+                    {!showAllAlternatives && alternativeReleases.length > 3 && (
+                      <FadeOverlay />
+                    )}
+                  </AlternativesList>
+                  
+                  {alternativeReleases.length > 3 && (
+                    <ShowMoreButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllAlternatives(!showAllAlternatives)}
+                    >
+                      {showAllAlternatives ? 'Show Less' : `Show All ${alternativeReleases.length} Variants`}
+                    </ShowMoreButton>
+                  )}
+                </AlternativesContainer>
+              </CardContent>
+            </AlternativesCard>
+          )}
         </MainContent>
 
         <Sidebar>
@@ -328,6 +413,7 @@ const DownloadButton = styled(Button)`
 
 const DescriptionCard = styled(Card)``;
 const InstallationCard = styled(Card)``;
+const AlternativesCard = styled(Card)``;
 const DetailsCard = styled(Card)``;
 const VerificationCard = styled(Card)``;
 const DeveloperCard = styled(Card)``;
@@ -458,6 +544,111 @@ const RawEventText = styled.pre`
   word-break: break-word;
   max-height: 400px;
   overflow-y: auto;
+`;
+
+const AlternativeCount = styled.span`
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.textSecondary};
+  font-weight: ${props => props.theme.fontWeights.normal};
+`;
+
+const AlternativesContainer = styled.div`
+  background-color: ${props => props.theme.colors.background};
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: ${props => props.theme.radii.md};
+  overflow: hidden;
+`;
+
+const AlternativesList = styled.div`
+  position: relative;
+  ${props => !props.$showAll && `
+    max-height: 280px;
+    overflow: hidden;
+  `}
+`;
+
+const AlternativesHeader = styled.div`
+  display: flex;
+  background-color: ${props => props.theme.colors.backgroundSecondary};
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+`;
+
+const AlternativeHeaderCell = styled.div`
+  flex: 0 0 ${props => props.width};
+  font-size: ${props => props.theme.fontSizes.xs};
+  font-weight: ${props => props.theme.fontWeights.semibold};
+  color: ${props => props.theme.colors.text};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const AlternativeRow = styled.div`
+  display: flex;
+  padding: ${props => props.theme.spacing.md};
+  border-bottom: 1px solid ${props => props.theme.colors.border};
+  transition: all ${props => props.theme.transitions.fast};
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${props => props.theme.colors.cardBackgroundHover};
+    transform: translateX(2px);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const AlternativeCell = styled.div`
+  flex: 0 0 ${props => props.width};
+  display: flex;
+  align-items: center;
+  justify-content: ${props => props.width === '10%' ? 'flex-end' : 'flex-start'};
+`;
+
+const AlternativeMainInfo = styled.div`
+  font-size: ${props => props.theme.fontSizes.sm};
+  font-weight: ${props => props.theme.fontWeights.medium};
+  color: ${props => props.theme.colors.text};
+  font-family: monospace;
+`;
+
+const AlternativeDate = styled.div`
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.textSecondary};
+`;
+
+const AlternativeChannelBadge = styled.span`
+  background-color: ${props => props.$color};
+  color: white;
+  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
+  border-radius: ${props => props.theme.radii.full};
+  font-size: ${props => props.theme.fontSizes.xs};
+  font-weight: ${props => props.theme.fontWeights.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const AlternativeDownloadButton = styled(Button)`
+  white-space: nowrap;
+  min-width: 80px;
+`;
+
+const FadeOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, ${props => props.theme.colors.cardBackground});
+  pointer-events: none;
+`;
+
+const ShowMoreButton = styled(Button)`
+  width: 100%;
+  margin-top: ${props => props.theme.spacing.md};
 `;
 
 export default DownloadPage;

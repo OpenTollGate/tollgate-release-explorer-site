@@ -345,6 +345,43 @@ export const getReleaseCountText = (releases) => {
 };
 
 /**
+ * Find all releases with the same version and product type but different architectures/devices
+ * @param {Array} releases - Array of all release events
+ * @param {Object} currentRelease - The current release to find alternatives for
+ * @returns {Array} Array of alternative releases
+ */
+export const findAlternativeReleases = (releases, currentRelease) => {
+  if (!releases || !Array.isArray(releases) || !currentRelease) return [];
+  
+  const currentVersion = getReleaseVersion(currentRelease);
+  const currentProductType = getReleaseProductType(currentRelease);
+  const currentArchitecture = getReleaseArchitecture(currentRelease);
+  const currentDeviceId = getReleaseDeviceId(currentRelease);
+  
+  return releases.filter(release => {
+    if (release.id === currentRelease.id) return false; // Exclude current release
+    
+    const version = getReleaseVersion(release);
+    const productType = getReleaseProductType(release);
+    
+    // Must match version and product type
+    if (version !== currentVersion || productType !== currentProductType) {
+      return false;
+    }
+    
+    // For OS releases, show different device_ids
+    if (productType === 'tollgate-os') {
+      const deviceId = getReleaseDeviceId(release);
+      return deviceId !== currentDeviceId;
+    }
+    
+    // For packages (core, modules), show different architectures
+    const architecture = getReleaseArchitecture(release);
+    return architecture !== currentArchitecture;
+  });
+};
+
+/**
  * Truncate text to a specified maximum length, adding ellipsis if needed
  * @param {string} text - The text to truncate
  * @param {number} maxLength - The maximum allowed length (including ellipsis)
