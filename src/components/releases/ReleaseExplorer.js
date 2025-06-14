@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import { VIEW_MODES } from '../../constants';
-import { filterReleases, sortReleasesByDate, deduplicateReleases } from '../../utils/releaseUtils';
+import { filterReleases, sortReleasesByDate, deduplicateReleases, countReleases } from '../../utils/releaseUtils';
 import ReleaseGrid from './ReleaseGrid';
 import ReleaseList from './ReleaseList';
 
@@ -62,7 +62,7 @@ const ReleaseExplorer = ({ viewMode, filters }) => {
     <ExplorerContainer>
       <ResultsHeader>
         <ResultsText>
-          Showing {sortedReleases.length} of {releases.length} releases
+          Showing {sortedReleases.length} of {countReleases(releases).total} releases
         </ResultsText>
       </ResultsHeader>
 
