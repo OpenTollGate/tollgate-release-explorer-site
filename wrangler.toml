@@ -1,4 +1,4 @@
-name = "tollgate-release-explorer"
+name = "tollgate-release-explorer-site"
 compatibility_date = "2024-03-18"
 
 # Pages configuration
@@ -6,7 +6,7 @@ pages_build_output_dir = "build"
 
 [env.production]
 # Production environment configuration
-name = "tollgate-release-explorer"
+name = "tollgate-release-explorer-site"
 
 # Branch configuration for automatic production deployment
 [[env.production.pages_deployment]]
