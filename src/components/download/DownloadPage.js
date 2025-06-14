@@ -156,12 +156,12 @@ const DownloadPage = () => {
                 <AlternativesContainer>
                   <AlternativesList $showAll={showAllAlternatives}>
                     <AlternativesHeader>
-                      <AlternativeHeaderCell width="40%">
+                      <AlternativeHeaderCell width="50%">
                         {productType === 'tollgate-os' ? 'Device' : 'Architecture'}
                       </AlternativeHeaderCell>
                       <AlternativeHeaderCell width="25%">Date</AlternativeHeaderCell>
                       <AlternativeHeaderCell width="25%">Channel</AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="10%">Action</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="0%" className="hide-mobile">Action</AlternativeHeaderCell>
                     </AlternativesHeader>
                     
                     {(showAllAlternatives ? alternativeReleases : alternativeReleases.slice(0, 3)).map((altRelease) => (
@@ -169,7 +169,7 @@ const DownloadPage = () => {
                         key={altRelease.id}
                         onClick={() => navigate(`/download/${altRelease.id}`)}
                       >
-                        <AlternativeCell width="40%">
+                        <AlternativeCell width="50%">
                           <AlternativeMainInfo>
                             {productType === 'tollgate-os' ? getReleaseDeviceId(altRelease) : getReleaseArchitecture(altRelease)}
                           </AlternativeMainInfo>
@@ -180,12 +180,15 @@ const DownloadPage = () => {
                         </AlternativeCell>
                         
                         <AlternativeCell width="25%">
-                          <AlternativeChannelBadge $color={getChannelColor(getReleaseChannel(altRelease))}>
-                            {getReleaseChannel(altRelease)}
-                          </AlternativeChannelBadge>
+                          <AlternativeChannelContainer>
+                            <AlternativeChannelDot $color={getChannelColor(getReleaseChannel(altRelease))} className="show-mobile" />
+                            <AlternativeChannelBadge $color={getChannelColor(getReleaseChannel(altRelease))} className="hide-mobile">
+                              {getReleaseChannel(altRelease)}
+                            </AlternativeChannelBadge>
+                          </AlternativeChannelContainer>
                         </AlternativeCell>
                         
-                        <AlternativeCell width="10%">
+                        <AlternativeCell width="0%" className="hide-mobile">
                           <AlternativeDownloadButton
                             variant="primary"
                             size="sm"
@@ -329,6 +332,14 @@ const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.lg};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.sm};
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
 `;
 
 const Header = styled.div`
@@ -346,6 +357,13 @@ const ContentGrid = styled.div`
 
   @media (max-width: ${props => props.theme.breakpoints.lg}) {
     grid-template-columns: 1fr;
+    gap: ${props => props.theme.spacing.md};
+  }
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 0;
   }
 `;
 
@@ -353,6 +371,12 @@ const MainContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing.xl};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    min-width: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
 `;
 
 const Sidebar = styled.div`
@@ -371,6 +395,8 @@ const ReleaseHeader = styled.div`
   @media (max-width: ${props => props.theme.breakpoints.md}) {
     flex-direction: column;
     align-items: stretch;
+    margin-bottom: ${props => props.theme.spacing.md};
+    gap: ${props => props.theme.spacing.md};
   }
 `;
 
@@ -385,6 +411,11 @@ const ProductTitle = styled.h1`
   font-size: ${props => props.theme.fontSizes['3xl']};
   font-weight: ${props => props.theme.fontWeights.bold};
   color: ${props => props.theme.colors.text};
+  word-wrap: break-word;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.xl};
+  }
 `;
 
 const VersionText = styled.h2`
@@ -393,6 +424,11 @@ const VersionText = styled.h2`
   font-weight: ${props => props.theme.fontWeights.medium};
   color: ${props => props.theme.colors.primary};
   font-family: monospace;
+  word-break: break-all;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.lg};
+  }
 `;
 
 const ChannelBadge = styled.span`
@@ -411,13 +447,54 @@ const DownloadButton = styled(Button)`
   white-space: nowrap;
 `;
 
-const DescriptionCard = styled(Card)``;
-const InstallationCard = styled(Card)``;
-const AlternativesCard = styled(Card)``;
-const DetailsCard = styled(Card)``;
-const VerificationCard = styled(Card)``;
-const DeveloperCard = styled(Card)``;
-const ErrorCard = styled(Card)``;
+const DescriptionCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const InstallationCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const AlternativesCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const DetailsCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const VerificationCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const DeveloperCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
+
+const ErrorCard = styled(Card)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    word-wrap: break-word;
+  }
+`;
 
 const CommandSection = styled.div`
   margin-top: ${props => props.theme.spacing.md};
@@ -557,6 +634,12 @@ const AlternativesContainer = styled.div`
   border: 1px solid ${props => props.theme.colors.border};
   border-radius: ${props => props.theme.radii.md};
   overflow: hidden;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+  }
 `;
 
 const AlternativesList = styled.div`
@@ -581,6 +664,12 @@ const AlternativeHeaderCell = styled.div`
   color: ${props => props.theme.colors.text};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
 `;
 
 const AlternativeRow = styled.div`
@@ -606,6 +695,12 @@ const AlternativeCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: ${props => props.width === '10%' ? 'flex-end' : 'flex-start'};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
 `;
 
 const AlternativeMainInfo = styled.div`
@@ -613,11 +708,26 @@ const AlternativeMainInfo = styled.div`
   font-weight: ${props => props.theme.fontWeights.medium};
   color: ${props => props.theme.colors.text};
   font-family: monospace;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.xs};
+  }
 `;
 
 const AlternativeDate = styled.div`
   font-size: ${props => props.theme.fontSizes.sm};
   color: ${props => props.theme.colors.textSecondary};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.xs};
+  }
+`;
+
+const AlternativeChannelContainer = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const AlternativeChannelBadge = styled.span`
@@ -629,6 +739,27 @@ const AlternativeChannelBadge = styled.span`
   font-weight: ${props => props.theme.fontWeights.medium};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
+`;
+
+const AlternativeChannelDot = styled.div`
+  display: none;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.show-mobile {
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: ${props => props.$color};
+      flex-shrink: 0;
+    }
+  }
 `;
 
 const AlternativeDownloadButton = styled(Button)`

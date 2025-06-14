@@ -59,6 +59,12 @@ const AppContainer = styled.div`
   position: relative;
   background-color: ${props => props.theme.colors.background};
   color: ${props => props.theme.colors.text};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    overflow-x: hidden;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
 `;
 
 const MainContent = styled.main`
@@ -68,6 +74,10 @@ const MainContent = styled.main`
   
   @media (max-width: ${props => props.theme.breakpoints.md}) {
     padding: 0 ${props => props.theme.spacing.md};
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
   }
 `;
 
