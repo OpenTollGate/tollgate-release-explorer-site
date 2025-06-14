@@ -38,13 +38,13 @@ const Header = ({ viewMode, onViewModeChange }) => {
               <PublisherValue>
                 {isDefaultPubkey ? 'TollGate (Official)' : `${currentPubkey.slice(0, 8)}...`}
               </PublisherValue>
-              <Button 
-                variant="outline" 
+              <SwitchButton
+                variant="outline"
                 size="sm"
                 onClick={() => setShowPublisherModal(true)}
               >
                 Switch Publisher
-              </Button>
+              </SwitchButton>
             </PublisherInfo>
 
             <ViewToggle>
@@ -82,6 +82,10 @@ const HeaderContainer = styled.header`
   position: sticky;
   top: 0;
   z-index: 10;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    padding: ${props => props.theme.spacing.sm} 0;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -94,9 +98,9 @@ const HeaderContent = styled.div`
   gap: ${props => props.theme.spacing.lg};
 
   @media (max-width: ${props => props.theme.breakpoints.md}) {
-    padding: 0 ${props => props.theme.spacing.md};
+    padding: 0 ${props => props.theme.spacing.sm};
     flex-direction: column;
-    gap: ${props => props.theme.spacing.md};
+    gap: ${props => props.theme.spacing.sm};
   }
 `;
 
@@ -110,11 +114,19 @@ const LogoSection = styled.div`
   &:hover {
     opacity: 0.8;
   }
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    gap: ${props => props.theme.spacing.sm};
+  }
 `;
 
 const Logo = styled.img`
   height: 40px;
   width: auto;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    height: 24px;
+  }
 `;
 
 const TitleSection = styled.div`
@@ -127,12 +139,21 @@ const Title = styled.h1`
   font-size: ${props => props.theme.fontSizes['2xl']};
   font-weight: ${props => props.theme.fontWeights.bold};
   color: ${props => props.theme.colors.text};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.lg};
+  }
 `;
 
 const Subtitle = styled.p`
   margin: 0;
   font-size: ${props => props.theme.fontSizes.sm};
   color: ${props => props.theme.colors.textSecondary};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: ${props => props.theme.fontSizes.xs};
+    display: none;
+  }
 `;
 
 const HeaderActions = styled.div`
@@ -141,9 +162,10 @@ const HeaderActions = styled.div`
   gap: ${props => props.theme.spacing.lg};
 
   @media (max-width: ${props => props.theme.breakpoints.md}) {
-    flex-direction: column;
-    gap: ${props => props.theme.spacing.md};
+    flex-direction: row;
+    gap: ${props => props.theme.spacing.sm};
     width: 100%;
+    justify-content: space-between;
   }
 `;
 
@@ -157,20 +179,39 @@ const PublisherInfo = styled.div`
   border: 1px solid ${props => props.theme.colors.border};
 
   @media (max-width: ${props => props.theme.breakpoints.md}) {
-    width: 100%;
+    flex: 1;
     justify-content: space-between;
+    padding: 4px 8px;
+    gap: 4px;
+    min-height: 32px;
   }
 `;
 
 const PublisherLabel = styled.span`
   font-size: ${props => props.theme.fontSizes.sm};
   color: ${props => props.theme.colors.textSecondary};
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: 10px;
+  }
 `;
 
 const PublisherValue = styled.span`
   font-size: ${props => props.theme.fontSizes.sm};
   color: ${props => props.theme.colors.text};
   font-family: monospace;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: 10px;
+  }
+`;
+
+const SwitchButton = styled(Button)`
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-height: 24px;
+  }
 `;
 
 const ViewToggle = styled.div`
