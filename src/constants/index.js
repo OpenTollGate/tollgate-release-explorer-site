@@ -15,7 +15,8 @@ export const RELEASE_CHANNELS = {
 // Product types
 export const PRODUCT_TYPES = {
   TOLLGATE_OS: 'tollgate-os',
-  TOLLGATE_CORE: 'tollgate-core'
+  TOLLGATE_CORE: 'tollgate-core',
+  TOLLGATE_BASIC: 'tollgate-module-basic-go'
 };
 
 // View modes
@@ -35,7 +36,7 @@ export const DEFAULT_RELAYS = [
 // Filter defaults
 export const DEFAULT_FILTERS = {
   channels: [RELEASE_CHANNELS.STABLE], // Default to stable only
-  products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_CORE],
+  products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_CORE, PRODUCT_TYPES.TOLLGATE_BASIC],
   architectures: [],
   devices: []
 };

@@ -188,8 +188,17 @@ const DownloadPage = () => {
                   </HashValue>
                 </HashSection>
                 <VerifyInstructions>
-                  After downloading, verify the file integrity by comparing the SHA-256 hash.
+                  After downloading, verify the file integrity by comparing the SHA-256 hash:
                 </VerifyInstructions>
+                <CommandSection>
+                  <CommandCode onClick={() => copyToClipboard(`shasum -a 256 ${downloadUrl?.split('/').pop() || 'downloaded-file'}`)}>
+                    shasum -a 256 {downloadUrl?.split('/').pop() || 'downloaded-file'}
+                    <CopyIcon>📋</CopyIcon>
+                  </CommandCode>
+                  <CommandNote>
+                    Run this command in your terminal after downloading to verify the file hash matches.
+                  </CommandNote>
+                </CommandSection>
               </CardContent>
             </VerificationCard>
           )}
@@ -211,7 +220,15 @@ const DownloadPage = () => {
               {showRawEvent && (
                 <RawEventSection>
                   <RawEventText>
-                    {JSON.stringify(release, null, 2)}
+                    {JSON.stringify({
+                      id: release.id,
+                      pubkey: release.pubkey,
+                      created_at: release.created_at,
+                      kind: release.kind,
+                      tags: release.tags,
+                      content: release.content,
+                      sig: release.sig
+                    }, null, 2)}
                   </RawEventText>
                 </RawEventSection>
               )}
@@ -315,6 +332,37 @@ const DetailsCard = styled(Card)``;
 const VerificationCard = styled(Card)``;
 const DeveloperCard = styled(Card)``;
 const ErrorCard = styled(Card)``;
+
+const CommandSection = styled.div`
+  margin-top: ${props => props.theme.spacing.md};
+`;
+
+const CommandCode = styled.div`
+  font-family: monospace;
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.text};
+  background-color: ${props => props.theme.colors.backgroundTertiary};
+  padding: ${props => props.theme.spacing.md};
+  border-radius: ${props => props.theme.radii.sm};
+  word-break: break-all;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: ${props => props.theme.spacing.sm};
+  margin-bottom: ${props => props.theme.spacing.sm};
+  
+  &:hover {
+    background-color: ${props => props.theme.colors.cardBackground};
+  }
+`;
+
+const CommandNote = styled.p`
+  font-size: ${props => props.theme.fontSizes.xs};
+  color: ${props => props.theme.colors.textMuted};
+  margin: 0;
+  font-style: italic;
+`;
 
 const Description = styled.p`
   color: ${props => props.theme.colors.textSecondary};

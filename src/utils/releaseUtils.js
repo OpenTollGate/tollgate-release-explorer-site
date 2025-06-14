@@ -4,8 +4,12 @@
  * @returns {string} A formatted version string
  */
 export const getReleaseVersion = (release) => {
-  return release.getMatchingTags("tollgate_os_version")?.[0]?.[1] || 
-         release.getMatchingTags("tollgate_core_version")?.[0]?.[1] ||
+  // Prefer new standardized 'version' tag
+  const version = release.getMatchingTags("version")?.[0]?.[1];
+  if (version) return version;
+  
+  // Fallback to deprecated format tags
+  return release.getMatchingTags("tollgate_os_version")?.[0]?.[1] ||
          release.id?.substring(0, 8) || 'Unknown';
 };
 
@@ -101,24 +105,40 @@ export const getReleaseMimeType = (release) => {
 /**
  * Determine the product type from a release
  * @param {Object} release - The Nostr event containing release information
- * @returns {string} Either 'tollgate-os' or 'tollgate-core'
+ * @returns {string} Either 'tollgate-os', 'tollgate-core', or 'tollgate-module-basic-go'
  */
 export const getReleaseProductType = (release) => {
-  // Check if it has TollGate OS version tag
+  // Prefer new standardized 'name' tag
+  const name = release.getMatchingTags("name")?.[0]?.[1];
+  if (name) {
+    if (name.includes('tollgate-os')) return 'tollgate-os';
+    if (name.includes('tollgate-core')) return 'tollgate-core';
+    if (name.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
+  }
+  
+  // Fallback to deprecated 'package_name' tag
+  const packageName = release.getMatchingTags("package_name")?.[0]?.[1];
+  if (packageName) {
+    if (packageName.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
+  }
+  
+  // Check if it has deprecated version tags
   if (release.getMatchingTags("tollgate_os_version")?.[0]?.[1]) {
     return 'tollgate-os';
   }
+
   
-  // Check if it has TollGate Core version tag
-  if (release.getMatchingTags("tollgate_core_version")?.[0]?.[1]) {
-    return 'tollgate-core';
-  }
-  
-  // Fallback: check content or filename
+  // Fallback: check content, filename, or URL
   const content = release.content?.toLowerCase() || '';
   const url = getReleaseDownloadUrl(release)?.toLowerCase() || '';
+  const filename = release.getMatchingTags("filename")?.[0]?.[1]?.toLowerCase() || '';
   
-  if (content.includes('core') || url.includes('core')) {
+  if (content.includes('basic') || url.includes('basic') || filename.includes('basic') ||
+      content.includes('module') || url.includes('module') || filename.includes('module')) {
+    return 'tollgate-module-basic-go';
+  }
+  
+  if (content.includes('core') || url.includes('core') || filename.includes('core')) {
     return 'tollgate-core';
   }
   
@@ -128,7 +148,7 @@ export const getReleaseProductType = (release) => {
 
 /**
  * Get a human-readable product name
- * @param {string} productType - The product type ('tollgate-os' or 'tollgate-core')
+ * @param {string} productType - The product type ('tollgate-os', 'tollgate-core', or 'tollgate-module-basic-go')
  * @returns {string} Human-readable product name
  */
 export const getProductDisplayName = (productType) => {
@@ -137,6 +157,8 @@ export const getProductDisplayName = (productType) => {
       return 'TollGate OS';
     case 'tollgate-core':
       return 'TollGate Core';
+    case 'tollgate-module-basic-go':
+      return 'TollGate Basic Module';
     default:
       return 'TollGate';
   }
