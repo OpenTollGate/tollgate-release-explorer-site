@@ -1,0 +1,53 @@
+{
+  "name": "tollgate-release-explorer",
+  "version": "1.0.0",
+  "description": "A static web application for browsing and downloading TollGate OS and Core releases via Nostr NIP-94 events",
+  "private": true,
+  "dependencies": {
+    "@nostr-dev-kit/ndk": "^2.8.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "styled-components": "^6.1.1",
+    "web-vitals": "^3.5.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.5.1",
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": [
+    "tollgate",
+    "nostr",
+    "releases",
+    "nip-94",
+    "openwrt"
+  ],
+  "author": "TollGate",
+  "license": "MIT"
+}
