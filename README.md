@@ -1,5 +1,7 @@
 # TollGate Release Explorer
 
+![](./header-image.png)
+
 A static web application for browsing and downloading TollGate OS and Core releases via Nostr NIP-94 events.
 
 ## Features
