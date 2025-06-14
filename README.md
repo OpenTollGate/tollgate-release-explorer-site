@@ -195,6 +195,21 @@ npm run build
 # Deploy the build/ directory
 ```
 
+### Cloudflare Pages (Recommended)
+```bash
+# Install Wrangler CLI
+npm install -g wrangler
+
+# Login to Cloudflare
+wrangler login
+
+# Deploy to preview
+npm run deploy:preview
+
+# Deploy to production
+npm run deploy:production
+```
+
 ### GitHub Pages
 ```bash
 npm install --save-dev gh-pages

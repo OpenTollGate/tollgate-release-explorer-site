@@ -21,7 +21,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:preview": "npm run build && wrangler pages deploy build --project-name=tollgate-release-explorer",
+    "deploy:production": "npm run build && wrangler pages deploy build --project-name=tollgate-release-explorer --branch=main"
   },
   "eslintConfig": {
     "extends": [
