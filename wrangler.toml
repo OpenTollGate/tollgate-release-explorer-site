@@ -9,7 +9,7 @@ name = "tollgate-release-explorer-preview"
 
 # Build configuration for React app
 [build]
-command = "npm run build"
+command = "npm install && npm run build"
 cwd = "."
 watch_dir = "src"
 
