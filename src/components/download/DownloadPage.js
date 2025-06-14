@@ -156,12 +156,12 @@ const DownloadPage = () => {
                 <AlternativesContainer>
                   <AlternativesList $showAll={showAllAlternatives}>
                     <AlternativesHeader>
-                      <AlternativeHeaderCell width="50%">
+                      <AlternativeHeaderCell width="40%" mobileWidth="50%">
                         {productType === 'tollgate-os' ? 'Device' : 'Architecture'}
                       </AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="25%">Date</AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="25%">Channel</AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="0%" className="hide-mobile">Action</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="20%" mobileWidth="25%">Date</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="20%" mobileWidth="25%">Channel</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="20%" mobileWidth="0%" className="hide-mobile">Action</AlternativeHeaderCell>
                     </AlternativesHeader>
                     
                     {(showAllAlternatives ? alternativeReleases : alternativeReleases.slice(0, 3)).map((altRelease) => (
@@ -169,17 +169,17 @@ const DownloadPage = () => {
                         key={altRelease.id}
                         onClick={() => navigate(`/download/${altRelease.id}`)}
                       >
-                        <AlternativeCell width="50%">
+                        <AlternativeCell width="40%" mobileWidth="50%">
                           <AlternativeMainInfo>
                             {productType === 'tollgate-os' ? getReleaseDeviceId(altRelease) : getReleaseArchitecture(altRelease)}
                           </AlternativeMainInfo>
                         </AlternativeCell>
                         
-                        <AlternativeCell width="25%">
+                        <AlternativeCell width="20%" mobileWidth="25%">
                           <AlternativeDate>{getReleaseDate(altRelease)}</AlternativeDate>
                         </AlternativeCell>
                         
-                        <AlternativeCell width="25%">
+                        <AlternativeCell width="20%" mobileWidth="25%">
                           <AlternativeChannelContainer>
                             <AlternativeChannelDot $color={getChannelColor(getReleaseChannel(altRelease))} className="show-mobile" />
                             <AlternativeChannelBadge $color={getChannelColor(getReleaseChannel(altRelease))} className="hide-mobile">
@@ -188,7 +188,7 @@ const DownloadPage = () => {
                           </AlternativeChannelContainer>
                         </AlternativeCell>
                         
-                        <AlternativeCell width="0%" className="hide-mobile">
+                        <AlternativeCell width="20%" mobileWidth="0%" className="hide-mobile">
                           <AlternativeDownloadButton
                             variant="primary"
                             size="sm"
@@ -666,6 +666,8 @@ const AlternativeHeaderCell = styled.div`
   letter-spacing: 0.5px;
   
   @media (max-width: ${props => props.theme.breakpoints.md}) {
+    flex: 0 0 ${props => props.mobileWidth || props.width};
+    
     &.hide-mobile {
       display: none;
     }
@@ -694,9 +696,11 @@ const AlternativeCell = styled.div`
   flex: 0 0 ${props => props.width};
   display: flex;
   align-items: center;
-  justify-content: ${props => props.width === '10%' ? 'flex-end' : 'flex-start'};
+  justify-content: ${props => props.width === '20%' && props.className === 'hide-mobile' ? 'flex-end' : 'flex-start'};
   
   @media (max-width: ${props => props.theme.breakpoints.md}) {
+    flex: 0 0 ${props => props.mobileWidth || props.width};
+    
     &.hide-mobile {
       display: none;
     }
