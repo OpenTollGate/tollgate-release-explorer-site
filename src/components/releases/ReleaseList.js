@@ -35,7 +35,7 @@ const ReleaseList = ({ releases }) => {
         <HeaderCell width="15%">Date</HeaderCell>
         <HeaderCell width="20%">Architecture</HeaderCell>
         <HeaderCell width="15%">Device</HeaderCell>
-        <HeaderCell width="10%">Actions</HeaderCell>
+        <HeaderCell width="10%" className="hide-mobile">Actions</HeaderCell>
       </ListHeader>
 
       <ListBody>
@@ -72,9 +72,12 @@ const ReleaseRow = ({ release, onRowClick, onDownload }) => {
       </ListCell>
       
       <ListCell width="15%">
-        <ChannelBadge $color={getChannelColor(channel)}>
-          {channel}
-        </ChannelBadge>
+        <ChannelContainer>
+          <ChannelDot $color={getChannelColor(channel)} className="show-mobile" />
+          <ChannelBadge $color={getChannelColor(channel)} className="hide-mobile">
+            {channel}
+          </ChannelBadge>
+        </ChannelContainer>
       </ListCell>
       
       <ListCell width="15%">
@@ -89,7 +92,7 @@ const ReleaseRow = ({ release, onRowClick, onDownload }) => {
         <DeviceText>{truncateText(deviceId, 20)}</DeviceText>
       </ListCell>
       
-      <ListCell width="10%">
+      <ListCell width="10%" className="hide-mobile">
         <Button
           variant="primary"
           size="sm"
@@ -125,6 +128,12 @@ const HeaderCell = styled.div`
   color: ${props => props.theme.colors.text};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
 `;
 
 const ListBody = styled.div`
@@ -154,6 +163,12 @@ const ListCell = styled.div`
   flex: 0 0 ${props => props.width};
   display: flex;
   align-items: center;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
 `;
 
 const ProductInfo = styled.div`
@@ -174,6 +189,11 @@ const VersionText = styled.div`
   font-family: monospace;
 `;
 
+const ChannelContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const ChannelBadge = styled.span`
   background-color: ${props => props.$color};
   color: white;
@@ -183,6 +203,27 @@ const ChannelBadge = styled.span`
   font-weight: ${props => props.theme.fontWeights.medium};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.hide-mobile {
+      display: none;
+    }
+  }
+`;
+
+const ChannelDot = styled.div`
+  display: none;
+  
+  @media (max-width: ${props => props.theme.breakpoints.md}) {
+    &.show-mobile {
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: ${props => props.$color};
+      flex-shrink: 0;
+    }
+  }
 `;
 
 const DateText = styled.div`
