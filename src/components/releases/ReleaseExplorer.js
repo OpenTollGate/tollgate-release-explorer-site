@@ -2,15 +2,20 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import { VIEW_MODES } from '../../constants';
-import { filterReleases, sortReleasesByDate } from '../../utils/releaseUtils';
+import { filterReleases, sortReleasesByDate, deduplicateReleases } from '../../utils/releaseUtils';
 import ReleaseGrid from './ReleaseGrid';
 import ReleaseList from './ReleaseList';
 
 const ReleaseExplorer = ({ viewMode, filters }) => {
   const { releases, loading, error } = useNostrReleases();
 
-  // Filter and sort releases
-  const filteredReleases = filterReleases(releases, filters);
+  // Filter, deduplicate if needed, and sort releases
+  let filteredReleases = filterReleases(releases, filters);
+  
+  if (filters.deduplicate) {
+    filteredReleases = deduplicateReleases(filteredReleases);
+  }
+  
   const sortedReleases = sortReleasesByDate(filteredReleases);
 
   if (loading) {

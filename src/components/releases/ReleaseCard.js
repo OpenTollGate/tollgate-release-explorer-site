@@ -31,7 +31,12 @@ const ReleaseCard = ({ release }) => {
   const productName = getProductDisplayName(productType);
   const downloadUrl = getReleaseDownloadUrl(release);
 
-  const handleDownload = () => {
+  const handleCardClick = () => {
+    navigate(`/download/${release.id}`);
+  };
+
+  const handleDownload = (e) => {
+    e.stopPropagation();
     navigate(`/download/${release.id}`);
   };
 
@@ -41,7 +46,7 @@ const ReleaseCard = ({ release }) => {
   };
 
   return (
-    <StyledCard hover>
+    <StyledCard hover onClick={handleCardClick}>
       <CardHeader>
         <TitleRow>
           <ProductTitle>{productName}</ProductTitle>
@@ -123,6 +128,12 @@ const StyledCard = styled(Card)`
   height: 100%;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: transform ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
 `;
 
 const TitleRow = styled.div`

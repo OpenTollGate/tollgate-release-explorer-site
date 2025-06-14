@@ -209,6 +209,29 @@ export const filterReleases = (releases, filters) => {
 };
 
 /**
+ * Deduplicate releases by version and product type, keeping the latest release for each combination
+ * @param {Array} releases - Array of release events
+ * @returns {Array} Deduplicated releases
+ */
+export const deduplicateReleases = (releases) => {
+  if (!releases || !Array.isArray(releases)) return [];
+  
+  const releaseMap = new Map();
+  
+  releases.forEach(release => {
+    const version = getReleaseVersion(release);
+    const productType = getReleaseProductType(release);
+    const key = `${productType}-${version}`;
+    
+    if (!releaseMap.has(key) || release.created_at > releaseMap.get(key).created_at) {
+      releaseMap.set(key, release);
+    }
+  });
+  
+  return Array.from(releaseMap.values());
+};
+
+/**
  * Sort releases by creation date (newest first)
  * @param {Array} releases - Array of release events
  * @returns {Array} Sorted releases
@@ -259,6 +282,66 @@ export const getUniqueReleaseValues = (releases, field) => {
   });
   
   return Array.from(values).sort();
+};
+
+/**
+ * Check if a release is a development release
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {boolean} True if this is a dev release
+ */
+export const isDevRelease = (release) => {
+  const channel = getReleaseChannel(release);
+  return channel === 'dev';
+};
+
+/**
+ * Check if a release is a pre-release (beta, alpha, or dev)
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {boolean} True if this is a pre-release
+ */
+export const isPreRelease = (release) => {
+  const channel = getReleaseChannel(release);
+  return ['beta', 'alpha', 'dev'].includes(channel);
+};
+
+/**
+ * Count releases excluding dev releases
+ * @param {Array} releases - Array of release events
+ * @returns {Object} Object with stable and prerelease counts
+ */
+export const countReleases = (releases) => {
+  if (!releases || !Array.isArray(releases)) {
+    return { total: 0, stable: 0, prerelease: 0 };
+  }
+  
+  const nonDevReleases = releases.filter(release => !isDevRelease(release));
+  const stableReleases = nonDevReleases.filter(release => !isPreRelease(release));
+  const prereleases = nonDevReleases.filter(release => isPreRelease(release));
+  
+  return {
+    total: nonDevReleases.length,
+    stable: stableReleases.length,
+    prerelease: prereleases.length
+  };
+};
+
+/**
+ * Get display text for release count
+ * @param {Array} releases - Array of release events
+ * @returns {string} Formatted release count text
+ */
+export const getReleaseCountText = (releases) => {
+  const counts = countReleases(releases);
+  
+  if (counts.total === 0) {
+    return '0 releases';
+  }
+  
+  if (counts.prerelease === 0) {
+    return `${counts.total} releases`;
+  }
+  
+  return `${counts.total} releases (${counts.prerelease} pre)`;
 };
 
 /**

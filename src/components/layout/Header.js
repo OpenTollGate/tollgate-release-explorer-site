@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import { VIEW_MODES } from '../../constants';
@@ -11,14 +12,19 @@ import logoWhite from '../../assets/logo/TollGate_Logo-C-white.png';
 const Header = ({ viewMode, onViewModeChange }) => {
   const { currentPubkey } = useNostrReleases();
   const [showPublisherModal, setShowPublisherModal] = useState(false);
+  const navigate = useNavigate();
 
   const isDefaultPubkey = currentPubkey === '5075e61f0b048148b60105c1dd72bbeae1957336ae5824087e52efa374f8416a';
+
+  const handleLogoClick = () => {
+    navigate('/');
+  };
 
   return (
     <>
       <HeaderContainer>
         <HeaderContent>
-          <LogoSection>
+          <LogoSection onClick={handleLogoClick}>
             <Logo src={logoWhite} alt="TollGate" />
             <TitleSection>
               <Title>Release Explorer</Title>
@@ -98,6 +104,12 @@ const LogoSection = styled.div`
   display: flex;
   align-items: center;
   gap: ${props => props.theme.spacing.md};
+  cursor: pointer;
+  transition: opacity ${props => props.theme.transitions.fast};
+  
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const Logo = styled.img`

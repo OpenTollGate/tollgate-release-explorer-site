@@ -18,7 +18,12 @@ import {
 const ReleaseList = ({ releases }) => {
   const navigate = useNavigate();
 
-  const handleDownload = (releaseId) => {
+  const handleRowClick = (releaseId) => {
+    navigate(`/download/${releaseId}`);
+  };
+
+  const handleDownload = (e, releaseId) => {
+    e.stopPropagation();
     navigate(`/download/${releaseId}`);
   };
 
@@ -35,14 +40,19 @@ const ReleaseList = ({ releases }) => {
 
       <ListBody>
         {releases.map((release) => (
-          <ReleaseRow key={release.id} release={release} onDownload={handleDownload} />
+          <ReleaseRow
+            key={release.id}
+            release={release}
+            onRowClick={handleRowClick}
+            onDownload={handleDownload}
+          />
         ))}
       </ListBody>
     </ListContainer>
   );
 };
 
-const ReleaseRow = ({ release, onDownload }) => {
+const ReleaseRow = ({ release, onRowClick, onDownload }) => {
   const version = getReleaseVersion(release);
   const date = getReleaseDate(release);
   const channel = getReleaseChannel(release);
@@ -53,7 +63,7 @@ const ReleaseRow = ({ release, onDownload }) => {
   const downloadUrl = getReleaseDownloadUrl(release);
 
   return (
-    <ListRow>
+    <ListRow onClick={() => onRowClick(release.id)}>
       <ListCell width="25%">
         <ProductInfo>
           <ProductName>{productName}</ProductName>
@@ -83,7 +93,7 @@ const ReleaseRow = ({ release, onDownload }) => {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => onDownload(release.id)}
+          onClick={(e) => onDownload(e, release.id)}
           disabled={!downloadUrl}
         >
           Download
@@ -126,11 +136,13 @@ const ListRow = styled.div`
   display: flex;
   padding: ${props => props.theme.spacing.lg};
   border-bottom: 1px solid ${props => props.theme.colors.border};
-  transition: background-color ${props => props.theme.transitions.fast};
+  transition: all ${props => props.theme.transitions.fast};
   align-items: center;
+  cursor: pointer;
 
   &:hover {
     background-color: ${props => props.theme.colors.cardBackgroundHover};
+    transform: translateX(2px);
   }
 
   &:last-child {

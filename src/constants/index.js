@@ -38,12 +38,14 @@ export const DEFAULT_FILTERS = {
   channels: [RELEASE_CHANNELS.STABLE], // Default to stable only
   products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_CORE, PRODUCT_TYPES.TOLLGATE_BASIC],
   architectures: [],
-  devices: []
+  devices: [],
+  deduplicate: false
 };
 
 // Local storage keys
 export const STORAGE_KEYS = {
   PUBLISHER_PUBKEY: 'tollgate_publisher_pubkey',
   VIEW_MODE: 'tollgate_view_mode',
-  FILTERS: 'tollgate_filters'
+  FILTERS: 'tollgate_filters',
+  DEDUPLICATE: 'tollgate_deduplicate'
 };
