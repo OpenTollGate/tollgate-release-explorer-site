@@ -46,10 +46,8 @@ const NostrReleaseProvider = ({ children }) => {
     initializeNDK();
 
     return () => {
-      if (ndk) {
-        console.log("NostrReleaseProvider: Disconnecting from relays");
-        // Cleanup NDK connection
-      }
+      console.log("NostrReleaseProvider: Component unmounting");
+      // NDK cleanup would happen here if needed
     };
   }, []);
 
