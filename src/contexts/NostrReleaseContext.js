@@ -69,7 +69,7 @@ const NostrReleaseProvider = ({ children }) => {
         const filter = {
           kinds: [NIP94_KIND],
           authors: [currentPubkey],
-          limit: 100
+          limit: 500
         };
         
         console.log("NostrReleaseProvider: Filter:", filter);
