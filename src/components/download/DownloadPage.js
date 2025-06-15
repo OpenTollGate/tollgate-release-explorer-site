@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { useNostrReleases } from '../../contexts/NostrReleaseContext';
-import { getChannelColor } from '../../styles/theme';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { useNostrReleases } from "../../contexts/NostrReleaseContext";
+import { getChannelColor } from "../../styles/theme";
 import {
   getReleaseVersion,
   getReleaseDate,
@@ -16,10 +16,10 @@ import {
   getReleaseFileHash,
   getReleaseMimeType,
   getReleaseOpenWrtVersion,
-  findAlternativeReleases
-} from '../../utils/releaseUtils';
-import Button from '../common/Button';
-import Card, { CardHeader, CardContent } from '../common/Card';
+  findAlternativeReleases,
+} from "../../utils/releaseUtils";
+import Button from "../common/Button";
+import Card, { CardHeader, CardContent } from "../common/Card";
 
 const DownloadPage = () => {
   const { releaseId } = useParams();
@@ -28,8 +28,10 @@ const DownloadPage = () => {
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [showAllAlternatives, setShowAllAlternatives] = useState(false);
 
-  const release = releases.find(r => r.id === releaseId);
-  const alternativeReleases = release ? findAlternativeReleases(releases, release) : [];
+  const release = releases.find((r) => r.id === releaseId);
+  const alternativeReleases = release
+    ? findAlternativeReleases(releases, release)
+    : [];
 
   if (!release) {
     return (
@@ -40,9 +42,7 @@ const DownloadPage = () => {
           </CardHeader>
           <CardContent>
             <p>The requested release could not be found.</p>
-            <Button onClick={() => navigate('/')}>
-              Back to Explorer
-            </Button>
+            <Button onClick={() => navigate("/")}>Back to Explorer</Button>
           </CardContent>
         </ErrorCard>
       </PageContainer>
@@ -61,13 +61,15 @@ const DownloadPage = () => {
   const fileHash = getReleaseFileHash(release);
   const mimeType = getReleaseMimeType(release);
   const openWrtVersion = getReleaseOpenWrtVersion(release);
-  
+
   // Extract filename from download URL
-  const filename = downloadUrl ? downloadUrl.split('/').pop() : 'downloaded-file.ipk';
+  const filename = downloadUrl
+    ? downloadUrl.split("/").pop()
+    : "downloaded-file.ipk";
 
   const handleDownload = () => {
     if (downloadUrl) {
-      window.open(downloadUrl, '_blank');
+      window.open(downloadUrl, "_blank");
     }
   };
 
@@ -78,7 +80,7 @@ const DownloadPage = () => {
   return (
     <PageContainer>
       <Header>
-        <BackButton onClick={() => navigate('/')}>
+        <BackButton onClick={() => navigate("/")}>
           ← Back to Explorer
         </BackButton>
       </Header>
@@ -93,8 +95,8 @@ const DownloadPage = () => {
                 {channel}
               </ChannelBadge>
             </TitleSection>
-            <DownloadButton 
-              variant="primary" 
+            <DownloadButton
+              variant="primary"
               size="lg"
               onClick={handleDownload}
               disabled={!downloadUrl}
@@ -120,13 +122,19 @@ const DownloadPage = () => {
             </CardHeader>
             <CardContent>
               <InstructionsList>
-                {productType === 'tollgate-os' ? (
+                {productType === "tollgate-os" ? (
                   <>
                     <li>Download the firmware file to your computer</li>
-                    <li>Connect to your router's web interface (usually 192.168.1.1)</li>
+                    <li>
+                      Connect to your router's web interface (usually
+                      192.168.1.1)
+                    </li>
                     <li>Navigate to System → Firmware Upgrade</li>
                     <li>Select the downloaded firmware file</li>
-                    <li>Click "Flash Firmware" and wait for the process to complete</li>
+                    <li>
+                      Click "Flash Firmware" and wait for the process to
+                      complete
+                    </li>
                     <li>The router will reboot automatically when finished</li>
                   </>
                 ) : (
@@ -134,7 +142,9 @@ const DownloadPage = () => {
                     <li>Download the package file (.ipk) to your computer</li>
                     <li>Connect to your router via SSH</li>
                     <li>Upload the package file to the router</li>
-                    <li>Run: <code>opkg install {filename}</code></li>
+                    <li>
+                      Run: <code>opkg install {filename}</code>
+                    </li>
                     <li>Configure the service as needed</li>
                   </>
                 )}
@@ -146,10 +156,14 @@ const DownloadPage = () => {
             <AlternativesCard>
               <CardHeader>
                 <h3>
-                  {productType === 'tollgate-os' ? 'Other Devices' : 'Other Architectures'}
+                  {productType === "tollgate-os"
+                    ? "Other Devices"
+                    : "Other Architectures"}
                 </h3>
                 <AlternativeCount>
-                  {alternativeReleases.length} other {alternativeReleases.length === 1 ? 'variant' : 'variants'} available
+                  {alternativeReleases.length} other{" "}
+                  {alternativeReleases.length === 1 ? "variant" : "variants"}{" "}
+                  available
                 </AlternativeCount>
               </CardHeader>
               <CardContent>
@@ -157,45 +171,78 @@ const DownloadPage = () => {
                   <AlternativesList $showAll={showAllAlternatives}>
                     <AlternativesHeader>
                       <AlternativeHeaderCell width="40%" mobileWidth="50%">
-                        {productType === 'tollgate-os' ? 'Device' : 'Architecture'}
+                        {productType === "tollgate-os"
+                          ? "Device"
+                          : "Architecture"}
                       </AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="20%" mobileWidth="25%">Date</AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="20%" mobileWidth="25%">Channel</AlternativeHeaderCell>
-                      <AlternativeHeaderCell width="20%" mobileWidth="0%" className="hide-mobile">Action</AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="20%" mobileWidth="25%">
+                        Date
+                      </AlternativeHeaderCell>
+                      <AlternativeHeaderCell width="20%" mobileWidth="25%">
+                        Channel
+                      </AlternativeHeaderCell>
+                      <AlternativeHeaderCell
+                        width="20%"
+                        mobileWidth="0%"
+                        className="hide-mobile"
+                      >
+                        Action
+                      </AlternativeHeaderCell>
                     </AlternativesHeader>
-                    
-                    {(showAllAlternatives ? alternativeReleases : alternativeReleases.slice(0, 3)).map((altRelease) => (
+
+                    {(showAllAlternatives
+                      ? alternativeReleases
+                      : alternativeReleases.slice(0, 3)
+                    ).map((altRelease) => (
                       <AlternativeRow
                         key={altRelease.id}
                         onClick={() => navigate(`/download/${altRelease.id}`)}
                       >
                         <AlternativeCell width="40%" mobileWidth="50%">
                           <AlternativeMainInfo>
-                            {productType === 'tollgate-os' ? getReleaseDeviceId(altRelease) : getReleaseArchitecture(altRelease)}
+                            {productType === "tollgate-os"
+                              ? getReleaseDeviceId(altRelease)
+                              : getReleaseArchitecture(altRelease)}
                           </AlternativeMainInfo>
                         </AlternativeCell>
-                        
+
                         <AlternativeCell width="20%" mobileWidth="25%">
-                          <AlternativeDate>{getReleaseDate(altRelease)}</AlternativeDate>
+                          <AlternativeDate>
+                            {getReleaseDate(altRelease)}
+                          </AlternativeDate>
                         </AlternativeCell>
-                        
+
                         <AlternativeCell width="20%" mobileWidth="25%">
                           <AlternativeChannelContainer>
-                            <AlternativeChannelDot $color={getChannelColor(getReleaseChannel(altRelease))} className="show-mobile" />
-                            <AlternativeChannelBadge $color={getChannelColor(getReleaseChannel(altRelease))} className="hide-mobile">
+                            <AlternativeChannelDot
+                              $color={getChannelColor(
+                                getReleaseChannel(altRelease),
+                              )}
+                              className="show-mobile"
+                            />
+                            <AlternativeChannelBadge
+                              $color={getChannelColor(
+                                getReleaseChannel(altRelease),
+                              )}
+                              className="hide-mobile"
+                            >
                               {getReleaseChannel(altRelease)}
                             </AlternativeChannelBadge>
                           </AlternativeChannelContainer>
                         </AlternativeCell>
-                        
-                        <AlternativeCell width="20%" mobileWidth="0%" className="hide-mobile">
+
+                        <AlternativeCell
+                          width="20%"
+                          mobileWidth="0%"
+                          className="hide-mobile"
+                        >
                           <AlternativeDownloadButton
                             variant="primary"
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
                               const url = getReleaseDownloadUrl(altRelease);
-                              if (url) window.open(url, '_blank');
+                              if (url) window.open(url, "_blank");
                             }}
                             disabled={!getReleaseDownloadUrl(altRelease)}
                           >
@@ -204,19 +251,23 @@ const DownloadPage = () => {
                         </AlternativeCell>
                       </AlternativeRow>
                     ))}
-                    
+
                     {!showAllAlternatives && alternativeReleases.length > 3 && (
                       <FadeOverlay />
                     )}
                   </AlternativesList>
-                  
+
                   {alternativeReleases.length > 3 && (
                     <ShowMoreButton
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowAllAlternatives(!showAllAlternatives)}
+                      onClick={() =>
+                        setShowAllAlternatives(!showAllAlternatives)
+                      }
                     >
-                      {showAllAlternatives ? 'Show Less' : `Show All ${alternativeReleases.length} Variants`}
+                      {showAllAlternatives
+                        ? "Show Less"
+                        : `Show All ${alternativeReleases.length} Variants`}
                     </ShowMoreButton>
                   )}
                 </AlternativesContainer>
@@ -248,7 +299,7 @@ const DownloadPage = () => {
                   <DetailLabel>Supported Devices</DetailLabel>
                   <DetailValue>{supportedDevices}</DetailValue>
                 </DetailItem>
-                {openWrtVersion !== 'Unknown' && (
+                {openWrtVersion !== "Unknown" && (
                   <DetailItem>
                     <DetailLabel>OpenWRT Version</DetailLabel>
                     <DetailValue>{openWrtVersion}</DetailValue>
@@ -262,31 +313,53 @@ const DownloadPage = () => {
             </CardContent>
           </DetailsCard>
 
-          {fileHash && (
+          {(downloadUrl || fileHash) && (
             <VerificationCard>
               <CardHeader>
-                <h3>File Verification</h3>
+                <h3>Download</h3>
               </CardHeader>
               <CardContent>
-                <HashSection>
-                  <DetailLabel>SHA-256 Hash</DetailLabel>
-                  <HashValue onClick={() => copyToClipboard(fileHash)}>
-                    {fileHash}
-                    <CopyIcon>📋</CopyIcon>
-                  </HashValue>
-                </HashSection>
-                <VerifyInstructions>
-                  After downloading, verify the file integrity by comparing the SHA-256 hash:
-                </VerifyInstructions>
-                <CommandSection>
-                  <CommandCode onClick={() => copyToClipboard(`shasum -a 256 ${downloadUrl?.split('/').pop() || 'downloaded-file'}`)}>
-                    shasum -a 256 {downloadUrl?.split('/').pop() || 'downloaded-file'}
-                    <CopyIcon>📋</CopyIcon>
-                  </CommandCode>
-                  <CommandNote>
-                    Run this command in your terminal after downloading to verify the file hash matches.
-                  </CommandNote>
-                </CommandSection>
+                {downloadUrl && (
+                  <UrlSection>
+                    <DetailLabel>Download URL (Blossom)</DetailLabel>
+                    <UrlValue onClick={() => copyToClipboard(downloadUrl)}>
+                      {downloadUrl}
+                      <CopyIcon>📋</CopyIcon>
+                    </UrlValue>
+                  </UrlSection>
+                )}
+                {fileHash && (
+                  <>
+                    <HashSection>
+                      <DetailLabel>SHA-256 Hash</DetailLabel>
+                      <HashValue onClick={() => copyToClipboard(fileHash)}>
+                        {fileHash}
+                        <CopyIcon>📋</CopyIcon>
+                      </HashValue>
+                    </HashSection>
+                    <VerifyInstructions>
+                      After downloading, verify the file integrity by comparing
+                      the SHA-256 hash:
+                    </VerifyInstructions>
+                    <CommandSection>
+                      <CommandCode
+                        onClick={() =>
+                          copyToClipboard(
+                            `shasum -a 256 ${downloadUrl?.split("/").pop() || "downloaded-file"}`,
+                          )
+                        }
+                      >
+                        shasum -a 256{" "}
+                        {downloadUrl?.split("/").pop() || "downloaded-file"}
+                        <CopyIcon>📋</CopyIcon>
+                      </CommandCode>
+                      <CommandNote>
+                        Run this command in your terminal after downloading to
+                        verify the file hash matches.
+                      </CommandNote>
+                    </CommandSection>
+                  </>
+                )}
               </CardContent>
             </VerificationCard>
           )}
@@ -296,27 +369,31 @@ const DownloadPage = () => {
               <h3>Developer Info</h3>
             </CardHeader>
             <CardContent>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 fullWidth
                 onClick={() => setShowRawEvent(!showRawEvent)}
               >
-                {showRawEvent ? 'Hide' : 'Show'} Raw Event
+                {showRawEvent ? "Hide" : "Show"} Raw Event
               </Button>
-              
+
               {showRawEvent && (
                 <RawEventSection>
                   <RawEventText>
-                    {JSON.stringify({
-                      id: release.id,
-                      pubkey: release.pubkey,
-                      created_at: release.created_at,
-                      kind: release.kind,
-                      tags: release.tags,
-                      content: release.content,
-                      sig: release.sig
-                    }, null, 2)}
+                    {JSON.stringify(
+                      {
+                        id: release.id,
+                        pubkey: release.pubkey,
+                        created_at: release.created_at,
+                        kind: release.kind,
+                        tags: release.tags,
+                        content: release.content,
+                        sig: release.sig,
+                      },
+                      null,
+                      2,
+                    )}
                   </RawEventText>
                 </RawEventSection>
               )}
@@ -331,10 +408,12 @@ const DownloadPage = () => {
 const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: ${props => props.theme.spacing.xl} ${props => props.theme.spacing.lg};
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    padding: ${props => props.theme.spacing.md} ${props => props.theme.spacing.sm};
+  padding: ${(props) => props.theme.spacing.xl}
+    ${(props) => props.theme.spacing.lg};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    padding: ${(props) => props.theme.spacing.md}
+      ${(props) => props.theme.spacing.sm};
     overflow-x: hidden;
     max-width: 100vw;
     width: 100%;
@@ -343,24 +422,24 @@ const PageContainer = styled.div`
 `;
 
 const Header = styled.div`
-  margin-bottom: ${props => props.theme.spacing.xl};
+  margin-bottom: ${(props) => props.theme.spacing.xl};
 `;
 
 const BackButton = styled(Button)`
-  margin-bottom: ${props => props.theme.spacing.lg};
+  margin-bottom: ${(props) => props.theme.spacing.lg};
 `;
 
 const ContentGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 300px;
-  gap: ${props => props.theme.spacing.xl};
+  gap: ${(props) => props.theme.spacing.xl};
 
-  @media (max-width: ${props => props.theme.breakpoints.lg}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
     grid-template-columns: 1fr;
-    gap: ${props => props.theme.spacing.md};
+    gap: ${(props) => props.theme.spacing.md};
   }
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     width: 100%;
     min-width: 0;
@@ -370,9 +449,9 @@ const ContentGrid = styled.div`
 const MainContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.xl};
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  gap: ${(props) => props.theme.spacing.xl};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     min-width: 0;
     width: 100%;
     overflow-x: hidden;
@@ -382,62 +461,63 @@ const MainContent = styled.div`
 const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.lg};
+  gap: ${(props) => props.theme.spacing.lg};
 `;
 
 const ReleaseHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: ${props => props.theme.spacing.lg};
-  margin-bottom: ${props => props.theme.spacing.xl};
+  gap: ${(props) => props.theme.spacing.lg};
+  margin-bottom: ${(props) => props.theme.spacing.xl};
 
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     flex-direction: column;
     align-items: stretch;
-    margin-bottom: ${props => props.theme.spacing.md};
-    gap: ${props => props.theme.spacing.md};
+    margin-bottom: ${(props) => props.theme.spacing.md};
+    gap: ${(props) => props.theme.spacing.md};
   }
 `;
 
 const TitleSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.sm};
+  gap: ${(props) => props.theme.spacing.sm};
 `;
 
 const ProductTitle = styled.h1`
   margin: 0;
-  font-size: ${props => props.theme.fontSizes['3xl']};
-  font-weight: ${props => props.theme.fontWeights.bold};
-  color: ${props => props.theme.colors.text};
+  font-size: ${(props) => props.theme.fontSizes["3xl"]};
+  font-weight: ${(props) => props.theme.fontWeights.bold};
+  color: ${(props) => props.theme.colors.text};
   word-wrap: break-word;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    font-size: ${props => props.theme.fontSizes.xl};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.fontSizes.xl};
   }
 `;
 
 const VersionText = styled.h2`
   margin: 0;
-  font-size: ${props => props.theme.fontSizes.xl};
-  font-weight: ${props => props.theme.fontWeights.medium};
-  color: ${props => props.theme.colors.primary};
+  font-size: ${(props) => props.theme.fontSizes.xl};
+  font-weight: ${(props) => props.theme.fontWeights.medium};
+  color: ${(props) => props.theme.colors.primary};
   font-family: monospace;
   word-break: break-all;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    font-size: ${props => props.theme.fontSizes.lg};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.fontSizes.lg};
   }
 `;
 
 const ChannelBadge = styled.span`
-  background-color: ${props => props.$color};
+  background-color: ${(props) => props.$color};
   color: white;
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.radii.full};
-  font-size: ${props => props.theme.fontSizes.sm};
-  font-weight: ${props => props.theme.fontWeights.medium};
+  padding: ${(props) => props.theme.spacing.sm}
+    ${(props) => props.theme.spacing.md};
+  border-radius: ${(props) => props.theme.radii.full};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  font-weight: ${(props) => props.theme.fontWeights.medium};
   text-transform: uppercase;
   letter-spacing: 0.5px;
   align-self: flex-start;
@@ -448,149 +528,173 @@ const DownloadButton = styled(Button)`
 `;
 
 const DescriptionCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const InstallationCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const AlternativesCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const DetailsCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const VerificationCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const DeveloperCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const ErrorCard = styled(Card)`
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     overflow-x: hidden;
     word-wrap: break-word;
   }
 `;
 
 const CommandSection = styled.div`
-  margin-top: ${props => props.theme.spacing.md};
+  margin-top: ${(props) => props.theme.spacing.md};
 `;
 
 const CommandCode = styled.div`
   font-family: monospace;
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.text};
-  background-color: ${props => props.theme.colors.backgroundTertiary};
-  padding: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.radii.sm};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.text};
+  background-color: ${(props) => props.theme.colors.backgroundTertiary};
+  padding: ${(props) => props.theme.spacing.md};
+  border-radius: ${(props) => props.theme.radii.sm};
   word-break: break-all;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: ${props => props.theme.spacing.sm};
-  margin-bottom: ${props => props.theme.spacing.sm};
-  
+  gap: ${(props) => props.theme.spacing.sm};
+  margin-bottom: ${(props) => props.theme.spacing.sm};
+
   &:hover {
-    background-color: ${props => props.theme.colors.cardBackground};
+    background-color: ${(props) => props.theme.colors.cardBackground};
   }
 `;
 
 const CommandNote = styled.p`
-  font-size: ${props => props.theme.fontSizes.xs};
-  color: ${props => props.theme.colors.textMuted};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.textMuted};
   margin: 0;
   font-style: italic;
 `;
 
 const Description = styled.p`
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   line-height: 1.6;
   margin: 0;
 `;
 
 const InstructionsList = styled.ol`
-  color: ${props => props.theme.colors.textSecondary};
+  color: ${(props) => props.theme.colors.textSecondary};
   line-height: 1.6;
-  padding-left: ${props => props.theme.spacing.lg};
-  
+  padding-left: ${(props) => props.theme.spacing.lg};
+
   li {
-    margin-bottom: ${props => props.theme.spacing.sm};
+    margin-bottom: ${(props) => props.theme.spacing.sm};
   }
-  
+
   code {
-    background-color: ${props => props.theme.colors.backgroundTertiary};
-    padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-    border-radius: ${props => props.theme.radii.sm};
+    background-color: ${(props) => props.theme.colors.backgroundTertiary};
+    padding: ${(props) => props.theme.spacing.xs}
+      ${(props) => props.theme.spacing.sm};
+    border-radius: ${(props) => props.theme.radii.sm};
     font-family: monospace;
-    color: ${props => props.theme.colors.text};
+    color: ${(props) => props.theme.colors.text};
   }
 `;
 
 const DetailsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${props => props.theme.spacing.md};
+  gap: ${(props) => props.theme.spacing.md};
 `;
 
 const DetailItem = styled.div``;
 
 const DetailLabel = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textMuted};
-  margin-bottom: ${props => props.theme.spacing.xs};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.textMuted};
+  margin-bottom: ${(props) => props.theme.spacing.xs};
 `;
 
 const DetailValue = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.text};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.text};
   word-break: break-word;
 `;
 
-const HashSection = styled.div`
-  margin-bottom: ${props => props.theme.spacing.md};
+const UrlSection = styled.div`
+  margin-bottom: ${(props) => props.theme.spacing.md};
 `;
 
-const HashValue = styled.div`
+const UrlValue = styled.div`
   font-family: monospace;
-  font-size: ${props => props.theme.fontSizes.xs};
-  color: ${props => props.theme.colors.text};
-  background-color: ${props => props.theme.colors.backgroundTertiary};
-  padding: ${props => props.theme.spacing.sm};
-  border-radius: ${props => props.theme.radii.sm};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.text};
+  background-color: ${(props) => props.theme.colors.backgroundTertiary};
+  padding: ${(props) => props.theme.spacing.sm};
+  border-radius: ${(props) => props.theme.radii.sm};
   word-break: break-all;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: ${props => props.theme.spacing.sm};
-  
+  gap: ${(props) => props.theme.spacing.sm};
+
   &:hover {
-    background-color: ${props => props.theme.colors.cardBackground};
+    background-color: ${(props) => props.theme.colors.cardBackground};
+  }
+`;
+
+const HashSection = styled.div`
+  margin-bottom: ${(props) => props.theme.spacing.md};
+`;
+
+const HashValue = styled.div`
+  font-family: monospace;
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.text};
+  background-color: ${(props) => props.theme.colors.backgroundTertiary};
+  padding: ${(props) => props.theme.spacing.sm};
+  border-radius: ${(props) => props.theme.radii.sm};
+  word-break: break-all;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: ${(props) => props.theme.spacing.sm};
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.cardBackground};
   }
 `;
 
@@ -600,22 +704,22 @@ const CopyIcon = styled.span`
 `;
 
 const VerifyInstructions = styled.p`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.textSecondary};
   margin: 0;
   line-height: 1.5;
 `;
 
 const RawEventSection = styled.div`
-  margin-top: ${props => props.theme.spacing.md};
+  margin-top: ${(props) => props.theme.spacing.md};
 `;
 
 const RawEventText = styled.pre`
-  background-color: ${props => props.theme.colors.backgroundTertiary};
-  padding: ${props => props.theme.spacing.md};
-  border-radius: ${props => props.theme.radii.sm};
-  font-size: ${props => props.theme.fontSizes.xs};
-  color: ${props => props.theme.colors.textSecondary};
+  background-color: ${(props) => props.theme.colors.backgroundTertiary};
+  padding: ${(props) => props.theme.spacing.md};
+  border-radius: ${(props) => props.theme.radii.sm};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.textSecondary};
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
@@ -624,18 +728,18 @@ const RawEventText = styled.pre`
 `;
 
 const AlternativeCount = styled.span`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
-  font-weight: ${props => props.theme.fontWeights.normal};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.textSecondary};
+  font-weight: ${(props) => props.theme.fontWeights.normal};
 `;
 
 const AlternativesContainer = styled.div`
-  background-color: ${props => props.theme.colors.background};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: ${props => props.theme.radii.md};
+  background-color: ${(props) => props.theme.colors.background};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: ${(props) => props.theme.radii.md};
   overflow: hidden;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     width: 100%;
     min-width: 0;
     overflow-x: auto;
@@ -644,7 +748,9 @@ const AlternativesContainer = styled.div`
 
 const AlternativesList = styled.div`
   position: relative;
-  ${props => !props.$showAll && `
+  ${(props) =>
+    !props.$showAll &&
+    `
     max-height: 280px;
     overflow: hidden;
   `}
@@ -652,22 +758,23 @@ const AlternativesList = styled.div`
 
 const AlternativesHeader = styled.div`
   display: flex;
-  background-color: ${props => props.theme.colors.backgroundSecondary};
-  border-bottom: 1px solid ${props => props.theme.colors.border};
-  padding: ${props => props.theme.spacing.sm} ${props => props.theme.spacing.md};
+  background-color: ${(props) => props.theme.colors.backgroundSecondary};
+  border-bottom: 1px solid ${(props) => props.theme.colors.border};
+  padding: ${(props) => props.theme.spacing.sm}
+    ${(props) => props.theme.spacing.md};
 `;
 
 const AlternativeHeaderCell = styled.div`
-  flex: 0 0 ${props => props.width};
-  font-size: ${props => props.theme.fontSizes.xs};
-  font-weight: ${props => props.theme.fontWeights.semibold};
-  color: ${props => props.theme.colors.text};
+  flex: 0 0 ${(props) => props.width};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: ${(props) => props.theme.fontWeights.semibold};
+  color: ${(props) => props.theme.colors.text};
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    flex: 0 0 ${props => props.mobileWidth || props.width};
-    
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    flex: 0 0 ${(props) => props.mobileWidth || props.width};
+
     &.hide-mobile {
       display: none;
     }
@@ -676,14 +783,14 @@ const AlternativeHeaderCell = styled.div`
 
 const AlternativeRow = styled.div`
   display: flex;
-  padding: ${props => props.theme.spacing.md};
-  border-bottom: 1px solid ${props => props.theme.colors.border};
-  transition: all ${props => props.theme.transitions.fast};
+  padding: ${(props) => props.theme.spacing.md};
+  border-bottom: 1px solid ${(props) => props.theme.colors.border};
+  transition: all ${(props) => props.theme.transitions.fast};
   align-items: center;
   cursor: pointer;
 
   &:hover {
-    background-color: ${props => props.theme.colors.cardBackgroundHover};
+    background-color: ${(props) => props.theme.colors.cardBackgroundHover};
     transform: translateX(2px);
   }
 
@@ -693,14 +800,17 @@ const AlternativeRow = styled.div`
 `;
 
 const AlternativeCell = styled.div`
-  flex: 0 0 ${props => props.width};
+  flex: 0 0 ${(props) => props.width};
   display: flex;
   align-items: center;
-  justify-content: ${props => props.width === '20%' && props.className === 'hide-mobile' ? 'flex-end' : 'flex-start'};
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    flex: 0 0 ${props => props.mobileWidth || props.width};
-    
+  justify-content: ${(props) =>
+    props.width === "20%" && props.className === "hide-mobile"
+      ? "flex-end"
+      : "flex-start"};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    flex: 0 0 ${(props) => props.mobileWidth || props.width};
+
     &.hide-mobile {
       display: none;
     }
@@ -708,24 +818,24 @@ const AlternativeCell = styled.div`
 `;
 
 const AlternativeMainInfo = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  font-weight: ${props => props.theme.fontWeights.medium};
-  color: ${props => props.theme.colors.text};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  font-weight: ${(props) => props.theme.fontWeights.medium};
+  color: ${(props) => props.theme.colors.text};
   font-family: monospace;
   word-break: break-all;
   overflow-wrap: break-word;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    font-size: ${props => props.theme.fontSizes.xs};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.fontSizes.xs};
   }
 `;
 
 const AlternativeDate = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
-    font-size: ${props => props.theme.fontSizes.xs};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.textSecondary};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: ${(props) => props.theme.fontSizes.xs};
   }
 `;
 
@@ -735,16 +845,17 @@ const AlternativeChannelContainer = styled.div`
 `;
 
 const AlternativeChannelBadge = styled.span`
-  background-color: ${props => props.$color};
+  background-color: ${(props) => props.$color};
   color: white;
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.sm};
-  border-radius: ${props => props.theme.radii.full};
-  font-size: ${props => props.theme.fontSizes.xs};
-  font-weight: ${props => props.theme.fontWeights.medium};
+  padding: ${(props) => props.theme.spacing.xs}
+    ${(props) => props.theme.spacing.sm};
+  border-radius: ${(props) => props.theme.radii.full};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: ${(props) => props.theme.fontWeights.medium};
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     &.hide-mobile {
       display: none;
     }
@@ -753,14 +864,14 @@ const AlternativeChannelBadge = styled.span`
 
 const AlternativeChannelDot = styled.div`
   display: none;
-  
-  @media (max-width: ${props => props.theme.breakpoints.md}) {
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     &.show-mobile {
       display: block;
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background-color: ${props => props.$color};
+      background-color: ${(props) => props.$color};
       flex-shrink: 0;
     }
   }
@@ -777,13 +888,16 @@ const FadeOverlay = styled.div`
   left: 0;
   right: 0;
   height: 60px;
-  background: linear-gradient(transparent, ${props => props.theme.colors.cardBackground});
+  background: linear-gradient(
+    transparent,
+    ${(props) => props.theme.colors.cardBackground}
+  );
   pointer-events: none;
 `;
 
 const ShowMoreButton = styled(Button)`
   width: 100%;
-  margin-top: ${props => props.theme.spacing.md};
+  margin-top: ${(props) => props.theme.spacing.md};
 `;
 
 export default DownloadPage;
