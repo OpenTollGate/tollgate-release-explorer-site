@@ -92,15 +92,16 @@ const NostrReleaseProvider = ({ children }) => {
           )
           .subscribe(handleReleaseEvent);
         
-        setSubscription(currentSubscription);
-        
         // Set a 5-second timer to show empty state if no events are received
         const emptyStateTimer = setTimeout(() => {
-          if (releases.length === 0) {
-            console.log("NostrReleaseProvider: No events received after 5 seconds, showing empty state");
-            setShowEmptyState(true);
-            setLoading(false);
-          }
+          setReleases(prevReleases => {
+            if (prevReleases.length === 0) {
+              console.log("NostrReleaseProvider: No events received after 5 seconds, showing empty state");
+              setShowEmptyState(true);
+              setLoading(false);
+            }
+            return prevReleases;
+          });
         }, 5000);
         
         // Store timer reference to clean it up
