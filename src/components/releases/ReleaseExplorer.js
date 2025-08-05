@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import { VIEW_MODES } from '../../constants';
@@ -7,7 +6,7 @@ import ReleaseGrid from './ReleaseGrid';
 import ReleaseList from './ReleaseList';
 
 const ReleaseExplorer = ({ viewMode, filters }) => {
-  const { releases, loading, error } = useNostrReleases();
+  const { releases, loading, error, showEmptyState } = useNostrReleases();
 
   // Filter, deduplicate if needed, and sort releases
   let filteredReleases = filterReleases(releases, filters);
@@ -42,20 +41,32 @@ const ReleaseExplorer = ({ viewMode, filters }) => {
   }
 
   if (sortedReleases.length === 0) {
-    return (
-      <ExplorerContainer>
-        <EmptyState>
-          <EmptyIcon>📦</EmptyIcon>
-          <EmptyTitle>No releases found</EmptyTitle>
-          <EmptyMessage>
-            {releases.length === 0 
-              ? "No releases are available from this publisher."
-              : "No releases match your current filters. Try adjusting your filter criteria."
-            }
-          </EmptyMessage>
-        </EmptyState>
-      </ExplorerContainer>
-    );
+    if (showEmptyState) {
+      return (
+        <ExplorerContainer>
+          <EmptyState>
+            <EmptyIcon>📦</EmptyIcon>
+            <EmptyTitle>No releases found (yet)</EmptyTitle>
+            <EmptyMessage>
+              {releases.length === 0
+                ? "No releases are available from this publisher."
+                : "No releases match your current filters. Try adjusting your filter criteria."
+              }
+            </EmptyMessage>
+          </EmptyState>
+        </ExplorerContainer>
+      );
+    } else {
+      // Show loading spinner while waiting for the 5-second timer
+      return (
+        <ExplorerContainer>
+          <LoadingState>
+            <LoadingSpinner />
+            <LoadingText>Loading releases...</LoadingText>
+          </LoadingState>
+        </ExplorerContainer>
+      );
+    }
   }
 
   return (

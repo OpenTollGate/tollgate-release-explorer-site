@@ -4,13 +4,16 @@
   "description": "A static web application for browsing and downloading TollGate OS and Core releases via Nostr NIP-94 events",
   "private": true,
   "dependencies": {
-    "@nostr-dev-kit/ndk": "^2.8.2",
-    "nostr-tools": "^2.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
     "styled-components": "^6.1.1",
-    "web-vitals": "^3.5.0"
+    "web-vitals": "^3.5.0",
+    "applesauce-content": "^2.3.0",
+    "applesauce-core": "^2.3.0",
+    "applesauce-factory": "^2.3.0",
+    "applesauce-loaders": "^2.1.0",
+    "applesauce-relay": "^2.3.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.17.0",

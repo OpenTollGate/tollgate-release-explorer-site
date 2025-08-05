@@ -1,3 +1,19 @@
+import { getTagValue } from "applesauce-core/helpers";
+
+/**
+ * Helper function to get matching tags from AppleSauce or NDK events
+ * @param {Object} release - The Nostr event containing release information
+ * @param {string} tagName - The tag name to search for
+ * @returns {Array} Array of matching tags
+ */
+const getMatchingTags = (release, tagName) => {
+  if (typeof release.getMatchingTags === 'function') {
+    return release.getMatchingTags(tagName);
+  }
+  // AppleSauce format: tags is an array of [tagName, value, ...] arrays
+  return release.tags?.filter(tag => tag[0] === tagName) || [];
+};
+
 /**
  * Get a display-friendly version number from a Nostr event
  * @param {Object} release - The Nostr event containing release information
@@ -5,11 +21,11 @@
  */
 export const getReleaseVersion = (release) => {
   // Prefer new standardized 'version' tag
-  const version = release.getMatchingTags("version")?.[0]?.[1];
+  const version = getTagValue(release, "version")
   if (version) return version;
   
   // Fallback to deprecated format tags
-  return release.getMatchingTags("tollgate_os_version")?.[0]?.[1] ||
+  return getTagValue(release, "tollgate_os_version") ||
          release.id?.substring(0, 8) || 'Unknown';
 };
 
@@ -35,7 +51,7 @@ export const getReleaseDate = (release) => {
  * @returns {string} The release channel
  */
 export const getReleaseChannel = (release) => {
-  return release.getMatchingTags("release_channel")?.[0]?.[1] || 'stable';
+  return getMatchingTags(release, "release_channel")?.[0]?.[1] || 'dev';
 };
 
 /**
@@ -44,7 +60,7 @@ export const getReleaseChannel = (release) => {
  * @returns {string} The architecture or "Unknown"
  */
 export const getReleaseArchitecture = (release) => {
-  return release.getMatchingTags("architecture")?.[0]?.[1] || "Unknown";
+  return getMatchingTags(release, "architecture")?.[0]?.[1] || "Unknown";
 };
 
 /**
@@ -53,7 +69,7 @@ export const getReleaseArchitecture = (release) => {
  * @returns {string} The OpenWRT version or "Unknown"
  */
 export const getReleaseOpenWrtVersion = (release) => {
-  return release.getMatchingTags("openwrt_version")?.[0]?.[1] || "Unknown";
+  return getMatchingTags(release, "openwrt_version")?.[0]?.[1] || "Unknown";
 };
 
 /**
@@ -62,7 +78,7 @@ export const getReleaseOpenWrtVersion = (release) => {
  * @returns {string} The device ID or "Unknown"
  */
 export const getReleaseDeviceId = (release) => {
-  return release.getMatchingTags("device_id")?.[0]?.[1] || "Unknown";
+  return getMatchingTags(release, "device_id")?.[0]?.[1] || "Unknown";
 };
 
 /**
@@ -71,7 +87,7 @@ export const getReleaseDeviceId = (release) => {
  * @returns {string} The supported devices or "Unknown"
  */
 export const getReleaseSupportedDevices = (release) => {
-  return release.getMatchingTags("supported_devices")?.[0]?.[1] || "Unknown";
+  return getMatchingTags(release, "supported_devices")?.[0]?.[1] || "Unknown";
 };
 
 /**
@@ -80,7 +96,7 @@ export const getReleaseSupportedDevices = (release) => {
  * @returns {string} The download URL or null
  */
 export const getReleaseDownloadUrl = (release) => {
-  return release.getMatchingTags("url")?.[0]?.[1] || null;
+  return getMatchingTags(release, "url")?.[0]?.[1] || null;
 };
 
 /**
@@ -89,8 +105,8 @@ export const getReleaseDownloadUrl = (release) => {
  * @returns {string} The file hash or null
  */
 export const getReleaseFileHash = (release) => {
-  return release.getMatchingTags("x")?.[0]?.[1] || 
-         release.getMatchingTags("ox")?.[0]?.[1] || null;
+  return getMatchingTags(release, "x")?.[0]?.[1] ||
+         getMatchingTags(release, "ox")?.[0]?.[1] || null;
 };
 
 /**
@@ -99,7 +115,7 @@ export const getReleaseFileHash = (release) => {
  * @returns {string} The MIME type or "application/octet-stream"
  */
 export const getReleaseMimeType = (release) => {
-  return release.getMatchingTags("m")?.[0]?.[1] || "application/octet-stream";
+  return getMatchingTags(release, "m")?.[0]?.[1] || "application/octet-stream";
 };
 
 /**
@@ -109,7 +125,7 @@ export const getReleaseMimeType = (release) => {
  */
 export const getReleaseProductType = (release) => {
   // Prefer new standardized 'name' tag
-  const name = release.getMatchingTags("name")?.[0]?.[1];
+  const name = getMatchingTags(release, "name")?.[0]?.[1];
   if (name) {
     if (name.includes('tollgate-os')) return 'tollgate-os';
     if (name.includes('tollgate-core')) return 'tollgate-core';
@@ -117,13 +133,13 @@ export const getReleaseProductType = (release) => {
   }
   
   // Fallback to deprecated 'package_name' tag
-  const packageName = release.getMatchingTags("package_name")?.[0]?.[1];
+  const packageName = getMatchingTags(release, "package_name")?.[0]?.[1];
   if (packageName) {
     if (packageName.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
   }
   
   // Check if it has deprecated version tags
-  if (release.getMatchingTags("tollgate_os_version")?.[0]?.[1]) {
+  if (getMatchingTags(release, "tollgate_os_version")?.[0]?.[1]) {
     return 'tollgate-os';
   }
 
@@ -131,7 +147,7 @@ export const getReleaseProductType = (release) => {
   // Fallback: check content, filename, or URL
   const content = release.content?.toLowerCase() || '';
   const url = getReleaseDownloadUrl(release)?.toLowerCase() || '';
-  const filename = release.getMatchingTags("filename")?.[0]?.[1]?.toLowerCase() || '';
+  const filename = getMatchingTags(release, "filename")?.[0]?.[1]?.toLowerCase() || '';
   
   if (content.includes('basic') || url.includes('basic') || filename.includes('basic') ||
       content.includes('module') || url.includes('module') || filename.includes('module')) {
@@ -341,7 +357,7 @@ export const getReleaseCountText = (releases) => {
     return `${counts.total} releases`;
   }
   
-  return `${counts.total} releases (${counts.prerelease} pre)`;
+  return `${counts.total} releases ,${counts.prerelease} pre)`;
 };
 
 /**
