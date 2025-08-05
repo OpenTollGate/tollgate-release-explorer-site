@@ -1,7 +1,7 @@
 import { getTagValue } from "applesauce-core/helpers";
 
 /**
- * Helper function to get matching tags from AppleSauce or NDK events
+ * Helper function to get matching tags from AppleSauce events
  * @param {Object} release - The Nostr event containing release information
  * @param {string} tagName - The tag name to search for
  * @returns {Array} Array of matching tags

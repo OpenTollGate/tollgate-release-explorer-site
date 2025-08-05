@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { globalPool, globalEventStore } from './appleSauce';
 import { DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS } from '../constants';
 import { mapEventsToStore } from 'applesauce-core';
@@ -23,8 +23,8 @@ const NostrReleaseProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPubkey, setCurrentPubkey] = useState(DEFAULT_TOLLGATE_PUBKEY);
-  const [subscription, setSubscription] = useState(null);
   const [showEmptyState, setShowEmptyState] = useState(false);
+  const subscriptionRef = useRef(null);
 
   // Handle new release events
   const handleReleaseEvent = useCallback((event) => {
@@ -70,8 +70,13 @@ const NostrReleaseProvider = ({ children }) => {
         console.log(`NostrReleaseProvider: Setting up subscription for pubkey: ${currentPubkey}`);
         
         // Close existing subscription
-        if (subscription) {
-          subscription.unsubscribe();
+        if (subscriptionRef.current) {
+          if (subscriptionRef.current.unsubscribe) {
+            subscriptionRef.current.unsubscribe();
+          }
+          if (subscriptionRef.current.emptyStateTimer) {
+            clearTimeout(subscriptionRef.current.emptyStateTimer);
+          }
         }
 
         // Create filter for NIP-94 events from the specified publisher
@@ -104,11 +109,11 @@ const NostrReleaseProvider = ({ children }) => {
           });
         }, 5000);
         
-        // Store timer reference to clean it up
-        setSubscription({
+        // Store subscription and timer reference
+        subscriptionRef.current = {
           ...currentSubscription,
           emptyStateTimer
-        });
+        };
         
       } catch (err) {
         console.error("NostrReleaseProvider: Error setting up subscription:", err);
@@ -121,13 +126,13 @@ const NostrReleaseProvider = ({ children }) => {
     
     // Cleanup function
     return () => {
-      if (subscription) {
+      if (subscriptionRef.current) {
         console.log("NostrReleaseProvider: Cleaning up subscription");
-        if (subscription.unsubscribe) {
-          subscription.unsubscribe();
+        if (subscriptionRef.current.unsubscribe) {
+          subscriptionRef.current.unsubscribe();
         }
-        if (subscription.emptyStateTimer) {
-          clearTimeout(subscription.emptyStateTimer);
+        if (subscriptionRef.current.emptyStateTimer) {
+          clearTimeout(subscriptionRef.current.emptyStateTimer);
         }
       }
     };
@@ -138,6 +143,7 @@ const NostrReleaseProvider = ({ children }) => {
     if (currentPubkey) {
       setReleases([]);
       setLoading(true);
+      setShowEmptyState(false);
       // The subscription will automatically refetch when we clear the releases
     }
   }, [currentPubkey]);
