@@ -28,7 +28,7 @@ const FilterBar = ({ filters, onFiltersChange }) => {
   const clearAllFilters = () => {
     onFiltersChange({
       channels: [RELEASE_CHANNELS.STABLE], // Keep stable as default
-      products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_CORE],
+      products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_WRT],
       architectures: [],
       devices: [],
       deduplicate: false
@@ -113,7 +113,7 @@ const FilterBar = ({ filters, onFiltersChange }) => {
                 onClick={() => updateFilter('products', product)}
               >
                 {product === PRODUCT_TYPES.TOLLGATE_OS ? 'TollGate OS' :
-                 product === PRODUCT_TYPES.TOLLGATE_CORE ? 'TollGate Core' :
+                 product === PRODUCT_TYPES.TOLLGATE_WRT ? 'TollGate WRT' :
                  'TollGate Basic Module'}
               </FilterChip>
             ))}

@@ -121,14 +121,14 @@ export const getReleaseMimeType = (release) => {
 /**
  * Determine the product type from a release
  * @param {Object} release - The Nostr event containing release information
- * @returns {string} Either 'tollgate-os', 'tollgate-core', or 'tollgate-module-basic-go'
+ * @returns {string} Either 'tollgate-os', 'tollgate-wrt', or 'tollgate-module-basic-go'
  */
 export const getReleaseProductType = (release) => {
   // Prefer new standardized 'name' tag
   const name = getMatchingTags(release, "name")?.[0]?.[1];
   if (name) {
     if (name.includes('tollgate-os')) return 'tollgate-os';
-    if (name.includes('tollgate-core')) return 'tollgate-core';
+    if (name.includes('tollgate-wrt')) return 'tollgate-wrt';
     if (name.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
   }
   
@@ -136,6 +136,7 @@ export const getReleaseProductType = (release) => {
   const packageName = getMatchingTags(release, "package_name")?.[0]?.[1];
   if (packageName) {
     if (packageName.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
+    if (packageName.includes('tollgate-wrt')) return 'tollgate-wrt';
   }
   
   // Check if it has deprecated version tags
@@ -155,7 +156,7 @@ export const getReleaseProductType = (release) => {
   }
   
   if (content.includes('core') || url.includes('core') || filename.includes('core')) {
-    return 'tollgate-core';
+    return 'tollgate-wrt';
   }
   
   // Default to OS
@@ -164,15 +165,15 @@ export const getReleaseProductType = (release) => {
 
 /**
  * Get a human-readable product name
- * @param {string} productType - The product type ('tollgate-os', 'tollgate-core', or 'tollgate-module-basic-go')
+ * @param {string} productType - The product type ('tollgate-os', 'tollgate-wrt', or 'tollgate-module-basic-go')
  * @returns {string} Human-readable product name
  */
 export const getProductDisplayName = (productType) => {
   switch (productType) {
     case 'tollgate-os':
       return 'TollGate OS';
-    case 'tollgate-core':
-      return 'TollGate Core';
+    case 'tollgate-wrt':
+      return 'TollGate WRT';
     case 'tollgate-module-basic-go':
       return 'TollGate Basic Module';
     default:

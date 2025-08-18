@@ -67,7 +67,7 @@ The built files will be in the `build` directory, ready for deployment to any st
 ### Filtering Releases
 
 - **Channels**: stable (default), beta, alpha, dev
-- **Products**: TollGate OS (firmware images), TollGate Core (packages)
+- **Products**: TollGate OS (firmware images), TollGate WRT (packages)
 - **Architecture**: Filter by target architecture (e.g., aarch64_cortex-a53)
 - **Devices**: Filter by specific device models
 
@@ -135,7 +135,7 @@ The app expects NIP-94 file metadata events with these tags:
     ["device_id", "device_identifier"],
     ["supported_devices", "device1,device2"],
     ["openwrt_version", "openwrt_version"],
-    ["tollgate_os_version", "version"] // or tollgate_core_version
+    ["tollgate_os_version", "version"] // or TOLLGATE_WRT_version
     ["release_channel", "stable|beta|alpha|dev"]
   ],
   "content": "Release description"

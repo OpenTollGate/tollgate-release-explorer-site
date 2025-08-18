@@ -11,7 +11,7 @@
 ### 1. Release Browsing
 - Hybrid view: Card-based grid (default) with list view toggle
 - Filter by release channels: stable, beta, alpha, dev (default: stable only)
-- Filter by product type: TollGate OS, TollGate Core
+- Filter by product type: TollGate OS, TollGate WRT
 - Filter by architecture/device compatibility
 
 ### 2. Publisher Management
