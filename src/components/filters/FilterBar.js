@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import { RELEASE_CHANNELS, PRODUCT_CATEGORIES } from '../../constants';
-import { getUniqueReleaseValues, getReleaseCountText } from '../../utils/releaseUtils';
+import { getReleaseCountText } from '../../utils/releaseUtils';
 import { getChannelColor } from '../../styles/theme';
 import Button from '../common/Button';
 
@@ -218,13 +218,6 @@ const FilterChip = styled.button`
       ? (props.$color || props.theme.colors.primaryDark)
       : props.theme.colors.borderLight};
   }
-`;
-
-const MoreIndicator = styled.span`
-  color: ${props => props.theme.colors.textMuted};
-  font-size: ${props => props.theme.fontSizes.sm};
-  padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.md};
-  font-style: italic;
 `;
 
 export default FilterBar;
