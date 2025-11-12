@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
-import { VIEW_MODES } from '../../constants';
 import Button from '../common/Button';
 import PublisherModal from '../publisher/PublisherModal';
 
 // Import logo
 import logoWhite from '../../assets/logo/TollGate_Logo-C-white.png';
 
-const Header = ({ viewMode, onViewModeChange }) => {
+const Header = () => {
   const { currentPubkey } = useNostrReleases();
   const [showPublisherModal, setShowPublisherModal] = useState(false);
   const navigate = useNavigate();
@@ -46,23 +45,6 @@ const Header = ({ viewMode, onViewModeChange }) => {
                 Switch Publisher
               </SwitchButton>
             </PublisherInfo>
-
-            <ViewToggle>
-              <ViewButton 
-                $active={viewMode === VIEW_MODES.GRID}
-                onClick={() => onViewModeChange(VIEW_MODES.GRID)}
-                title="Grid View"
-              >
-                <GridIcon />
-              </ViewButton>
-              <ViewButton 
-                $active={viewMode === VIEW_MODES.LIST}
-                onClick={() => onViewModeChange(VIEW_MODES.LIST)}
-                title="List View"
-              >
-                <ListIcon />
-              </ViewButton>
-            </ViewToggle>
           </HeaderActions>
         </HeaderContent>
       </HeaderContainer>
@@ -213,49 +195,5 @@ const SwitchButton = styled(Button)`
     min-height: 24px;
   }
 `;
-
-const ViewToggle = styled.div`
-  display: flex;
-  background-color: ${props => props.theme.colors.cardBackground};
-  border-radius: ${props => props.theme.radii.md};
-  border: 1px solid ${props => props.theme.colors.border};
-  padding: 2px;
-`;
-
-const ViewButton = styled.button`
-  background-color: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
-  color: ${props => props.$active ? 'white' : props.theme.colors.textSecondary};
-  border: none;
-  padding: ${props => props.theme.spacing.sm};
-  border-radius: ${props => props.theme.radii.sm};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all ${props => props.theme.transitions.fast};
-
-  &:hover {
-    background-color: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.cardBackgroundHover};
-    color: ${props => props.$active ? 'white' : props.theme.colors.text};
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-// Simple SVG icons
-const GridIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
-  </svg>
-);
-
-const ListIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-  </svg>
-);
 
 export default Header;

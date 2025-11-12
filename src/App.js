@@ -19,7 +19,7 @@ const App = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [activeCategory, setActiveCategory] = useState(PRODUCT_CATEGORIES.OS);
+  const [activeCategory, setActiveCategory] = useState(PRODUCT_CATEGORIES.PACKAGES);
 
   // Parse filters from URL parameters
   const parseFiltersFromURL = useCallback(() => {
@@ -115,7 +115,7 @@ const App = () => {
     // Update URL parameters
     const newSearchParams = new URLSearchParams(searchParams);
     
-    if (newCategory !== PRODUCT_CATEGORIES.OS) {
+    if (newCategory !== PRODUCT_CATEGORIES.PACKAGES) {
       newSearchParams.set('category', newCategory);
     } else {
       newSearchParams.delete('category');
@@ -136,10 +136,7 @@ const App = () => {
       <NostrReleaseProvider>
         <AppContainer>
           <Background />
-          <Header
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-          />
+          <Header />
           
           <Routes>
             <Route
@@ -150,9 +147,11 @@ const App = () => {
                     activeTab={activeCategory}
                     onTabChange={handleCategoryChange}
                     tabs={[
-                      { value: PRODUCT_CATEGORIES.OS, label: 'OS Images' },
-                      { value: PRODUCT_CATEGORIES.PACKAGES, label: 'Packages' }
+                      { value: PRODUCT_CATEGORIES.PACKAGES, label: 'Packages' },
+                      { value: PRODUCT_CATEGORIES.OS, label: 'OS Images' }
                     ]}
+                    viewMode={viewMode}
+                    onViewModeChange={handleViewModeChange}
                   />
                   <FilterBar
                     filters={filters}

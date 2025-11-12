@@ -44,6 +44,22 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
     );
   }
 
+  // Get category description
+  const getCategoryDescription = () => {
+    if (activeCategory === PRODUCT_CATEGORIES.OS) {
+      return {
+        title: "OS Images",
+        description: "Complete OpenWrt firmware images that replace your router's existing operating system. These are device-specific builds that include TollGate pre-configured. Use these for a fresh installation or when setting up a new device."
+      };
+    }
+    return {
+      title: "Packages",
+      description: "TollGate software packages that can be installed on existing OpenWrt systems. These are architecture-specific and work across multiple compatible devices. Ideal for adding TollGate to your current OpenWrt installation."
+    };
+  };
+
+  const categoryInfo = getCategoryDescription();
+
   return (
     <FilterContainer>
       <FilterHeader>
@@ -58,25 +74,31 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
         )}
       </FilterHeader>
 
-      <FilterSections>
-        {/* Release Channels */}
-        <FilterSection>
-          <SectionTitle>Release Channels</SectionTitle>
-          <FilterGroup>
-            {Object.values(RELEASE_CHANNELS).map(channel => (
-              <FilterChip
-                key={channel}
-                $active={filters.channels.includes(channel)}
-                $color={getChannelColor(channel)}
-                onClick={() => updateFilter('channels', channel)}
-              >
-                {channel}
-              </FilterChip>
-            ))}
-          </FilterGroup>
-        </FilterSection>
+      <FilterContent>
+        <DescriptionSection>
+          <DescriptionTitle>{categoryInfo.title}</DescriptionTitle>
+          <DescriptionText>{categoryInfo.description}</DescriptionText>
+        </DescriptionSection>
 
-      </FilterSections>
+        <FilterSections>
+          {/* Release Channels */}
+          <FilterSection>
+            <SectionTitle>Release Channels</SectionTitle>
+            <FilterGroup>
+              {Object.values(RELEASE_CHANNELS).map(channel => (
+                <FilterChip
+                  key={channel}
+                  $active={filters.channels.includes(channel)}
+                  $color={getChannelColor(channel)}
+                  onClick={() => updateFilter('channels', channel)}
+                >
+                  {channel}
+                </FilterChip>
+              ))}
+            </FilterGroup>
+          </FilterSection>
+        </FilterSections>
+      </FilterContent>
     </FilterContainer>
   );
 };
@@ -118,13 +140,44 @@ const LoadingText = styled.p`
   margin: 0;
 `;
 
-const FilterSections = styled.div`
+const FilterContent = styled.div`
   display: grid;
-  gap: ${props => props.theme.spacing.lg};
+  grid-template-columns: 1fr 1fr;
+  gap: ${props => props.theme.spacing.xl};
   
-  @media (min-width: ${props => props.theme.breakpoints.lg}) {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  @media (max-width: ${props => props.theme.breakpoints.lg}) {
+    grid-template-columns: 1fr;
   }
+`;
+
+const DescriptionSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${props => props.theme.spacing.md};
+  padding: ${props => props.theme.spacing.lg};
+  background-color: ${props => props.theme.colors.background};
+  border-radius: ${props => props.theme.radii.md};
+  border-left: 3px solid ${props => props.theme.colors.primary};
+`;
+
+const DescriptionTitle = styled.h3`
+  margin: 0;
+  font-size: ${props => props.theme.fontSizes.lg};
+  font-weight: ${props => props.theme.fontWeights.semibold};
+  color: ${props => props.theme.colors.text};
+`;
+
+const DescriptionText = styled.p`
+  margin: 0;
+  font-size: ${props => props.theme.fontSizes.sm};
+  color: ${props => props.theme.colors.textSecondary};
+  line-height: 1.6;
+`;
+
+const FilterSections = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${props => props.theme.spacing.lg};
 `;
 
 const FilterSection = styled.div``;
