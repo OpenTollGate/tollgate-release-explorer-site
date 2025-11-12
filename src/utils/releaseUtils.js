@@ -358,7 +358,7 @@ export const getReleaseCountText = (releases) => {
     return `${counts.total} releases`;
   }
   
-  return `${counts.total} releases ,${counts.prerelease} pre)`;
+  return `${counts.total} releases ,${counts.prerelease} pre`;
 };
 
 /**

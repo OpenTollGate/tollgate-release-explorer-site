@@ -16,7 +16,6 @@ export const RELEASE_CHANNELS = {
 export const PRODUCT_TYPES = {
   TOLLGATE_OS: 'tollgate-os',
   TOLLGATE_WRT: 'tollgate-wrt',
-  TOLLGATE_BASIC: 'tollgate-module-basic-go'
 };
 
 // View modes

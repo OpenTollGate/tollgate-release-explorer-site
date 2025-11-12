@@ -112,9 +112,7 @@ const FilterBar = ({ filters, onFiltersChange }) => {
                 $active={filters.products.includes(product)}
                 onClick={() => updateFilter('products', product)}
               >
-                {product === PRODUCT_TYPES.TOLLGATE_OS ? 'TollGate OS' :
-                 product === PRODUCT_TYPES.TOLLGATE_WRT ? 'TollGate WRT' :
-                 'TollGate Basic Module'}
+                {product === PRODUCT_TYPES.TOLLGATE_OS ? 'TollGate OS' : 'TollGate WRT'}
               </FilterChip>
             ))}
           </FilterGroup>
