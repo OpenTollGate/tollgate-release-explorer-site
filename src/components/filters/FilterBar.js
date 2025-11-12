@@ -9,9 +9,6 @@ import Button from '../common/Button';
 const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
   const { releases, loading } = useNostrReleases();
 
-  // Get unique values for filter options
-  const availableDevices = getUniqueReleaseValues(releases, 'devices');
-
   const updateFilter = (filterType, value) => {
     const currentValues = filters[filterType] || [];
     const newValues = currentValues.includes(value)
@@ -27,14 +24,12 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
   const clearAllFilters = () => {
     onFiltersChange({
       channels: [RELEASE_CHANNELS.STABLE], // Keep stable as default
-      products: filters.products, // Keep current products (controlled by tabs)
-      devices: []
+      products: filters.products // Keep current products (controlled by tabs)
     });
   };
 
   const hasActiveFilters = () => {
-    return filters.devices.length > 0 ||
-           filters.channels.length !== 1 ||
+    return filters.channels.length !== 1 ||
            !filters.channels.includes(RELEASE_CHANNELS.STABLE);
   };
 
@@ -81,28 +76,6 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
           </FilterGroup>
         </FilterSection>
 
-        {/* Devices - Only show for OS category */}
-        {activeCategory === PRODUCT_CATEGORIES.OS && availableDevices.length > 0 && (
-          <FilterSection>
-            <SectionTitle>Devices</SectionTitle>
-            <FilterGroup>
-              {availableDevices.slice(0, 10).map(device => (
-                <FilterChip
-                  key={device}
-                  $active={filters.devices.includes(device)}
-                  onClick={() => updateFilter('devices', device)}
-                >
-                  {device}
-                </FilterChip>
-              ))}
-              {availableDevices.length > 10 && (
-                <MoreIndicator>
-                  +{availableDevices.length - 10} more
-                </MoreIndicator>
-              )}
-            </FilterGroup>
-          </FilterSection>
-        )}
       </FilterSections>
     </FilterContainer>
   );

@@ -23,7 +23,7 @@ const PackageDownloadPage = () => {
   const navigate = useNavigate();
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
-  const [showAllArchitectures, setShowAllArchitectures] = useState(false);
+  const [showAllArchitectures, setShowAllArchitectures] = useState(true);
   const [expandedArchitecture, setExpandedArchitecture] = useState(releaseId);
 
   const release = releases.find((r) => r.id === releaseId);
@@ -137,11 +137,8 @@ const PackageDownloadPage = () => {
                 Choose the correct architecture for your device. Click to expand for download details.
               </SelectionNote>
               
-              <ArchitecturesList $showAll={showAllArchitectures}>
-                {(showAllArchitectures
-                  ? allArchitectures
-                  : allArchitectures.slice(0, 5)
-                ).map((archRelease) => {
+              <ArchitecturesList>
+                {allArchitectures.map((archRelease) => {
                   const isExpanded = expandedArchitecture === archRelease.id;
                   const isCurrentArch = archRelease.id === releaseId;
                   const archDownloadUrl = getReleaseDownloadUrl(archRelease);
@@ -280,23 +277,7 @@ const PackageDownloadPage = () => {
                     </ArchitectureOption>
                   );
                 })}
-
-                {!showAllArchitectures && allArchitectures.length > 5 && (
-                  <FadeOverlay />
-                )}
               </ArchitecturesList>
-
-              {allArchitectures.length > 5 && (
-                <ShowMoreButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAllArchitectures(!showAllArchitectures)}
-                >
-                  {showAllArchitectures
-                    ? "Show Less"
-                    : `Show All ${allArchitectures.length} Architectures`}
-                </ShowMoreButton>
-              )}
             </CardContent>
           </ArchitectureSelectionCard>
         </MainContent>

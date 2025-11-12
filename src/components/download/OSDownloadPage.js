@@ -25,7 +25,7 @@ const OSDownloadPage = () => {
   const navigate = useNavigate();
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
-  const [showAllDevices, setShowAllDevices] = useState(false);
+  const [showAllDevices, setShowAllDevices] = useState(true);
   const [expandedDevice, setExpandedDevice] = useState(releaseId);
 
   const release = releases.find((r) => r.id === releaseId);
@@ -139,11 +139,8 @@ const OSDownloadPage = () => {
                 Choose the correct device variant for your hardware. Click to expand for download details.
               </SelectionNote>
               
-              <AlternativesList $showAll={showAllDevices}>
-                {(showAllDevices
-                  ? allDevices
-                  : allDevices.slice(0, 5)
-                ).map((deviceRelease) => {
+              <AlternativesList>
+                {allDevices.map((deviceRelease) => {
                   const isExpanded = expandedDevice === deviceRelease.id;
                   const isCurrentDevice = deviceRelease.id === releaseId;
                   const deviceDownloadUrl = getReleaseDownloadUrl(deviceRelease);
@@ -285,23 +282,7 @@ const OSDownloadPage = () => {
                     </DeviceOption>
                   );
                 })}
-
-                {!showAllDevices && allDevices.length > 5 && (
-                  <FadeOverlay />
-                )}
               </AlternativesList>
-
-              {allDevices.length > 5 && (
-                <ShowMoreButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAllDevices(!showAllDevices)}
-                >
-                  {showAllDevices
-                    ? "Show Less"
-                    : `Show All ${allDevices.length} Devices`}
-                </ShowMoreButton>
-              )}
             </CardContent>
           </DeviceSelectionCard>
 
