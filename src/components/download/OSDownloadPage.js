@@ -5,7 +5,7 @@ import { useNostrReleases } from "../../contexts/NostrReleaseContext";
 import { getChannelColor } from "../../styles/theme";
 import {
   getReleaseVersion,
-  getReleaseDate,
+  getReleaseDateWithTime,
   getReleaseChannel,
   getReleaseDeviceId,
   getReleaseSupportedDevices,
@@ -26,7 +26,8 @@ const OSDownloadPage = () => {
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [showAllDevices, setShowAllDevices] = useState(true);
-  const [expandedDevice, setExpandedDevice] = useState(releaseId);
+  const [expandedDevice, setExpandedDevice] = useState(null);
+  const [deviceSearch, setDeviceSearch] = useState("");
 
   const release = releases.find((r) => r.id === releaseId);
   const alternativeReleases = release
@@ -35,6 +36,13 @@ const OSDownloadPage = () => {
   
   // Combine current release with alternatives for full device list
   const allDevices = release ? [release, ...alternativeReleases] : [];
+  
+  // Filter devices based on search
+  const filteredDevices = allDevices.filter((deviceRelease) => {
+    if (!deviceSearch) return true;
+    const deviceId = getReleaseDeviceId(deviceRelease).toLowerCase();
+    return deviceId.includes(deviceSearch.toLowerCase());
+  });
 
   if (!release) {
     return (
@@ -53,7 +61,7 @@ const OSDownloadPage = () => {
   }
 
   const version = getReleaseVersion(release);
-  const date = getReleaseDate(release);
+  const dateTime = getReleaseDateWithTime(release);
   const channel = getReleaseChannel(release);
   const deviceId = getReleaseDeviceId(release);
   const supportedDevices = getReleaseSupportedDevices(release);
@@ -91,7 +99,7 @@ const OSDownloadPage = () => {
               <ChannelBadge $color={getChannelColor(channel)}>
                 {channel}
               </ChannelBadge>
-              <ReleasedDate>Released: {date}</ReleasedDate>
+              <ReleasedDate>Released: {dateTime}</ReleasedDate>
             </MetadataRow>
           </TitleSection>
         </ReleaseHeader>
@@ -131,28 +139,30 @@ const OSDownloadPage = () => {
             <CardHeader>
               <h3>Available Devices</h3>
               <DeviceCount>
-                {allDevices.length} {allDevices.length === 1 ? "device" : "devices"}
+                {filteredDevices.length} of {allDevices.length} {allDevices.length === 1 ? "device" : "devices"}
               </DeviceCount>
             </CardHeader>
             <CardContent>
-              <SelectionNote>
-                Choose the correct device variant for your hardware. Click to expand for download details.
-              </SelectionNote>
+              <SearchInput
+                type="text"
+                placeholder="Search devices..."
+                value={deviceSearch}
+                onChange={(e) => setDeviceSearch(e.target.value)}
+              />
               
               <AlternativesList>
-                {allDevices.map((deviceRelease) => {
+                {filteredDevices.map((deviceRelease) => {
                   const isExpanded = expandedDevice === deviceRelease.id;
-                  const isCurrentDevice = deviceRelease.id === releaseId;
                   const deviceDownloadUrl = getReleaseDownloadUrl(deviceRelease);
                   const deviceFileHash = getReleaseFileHash(deviceRelease);
-                  const deviceDate = getReleaseDate(deviceRelease);
+                  const deviceDate = getReleaseDateWithTime(deviceRelease);
                   const deviceChannel = getReleaseChannel(deviceRelease);
                   const deviceId = getReleaseDeviceId(deviceRelease);
                   
                   return (
                     <DeviceOption
                       key={deviceRelease.id}
-                      $isHighlighted={isCurrentDevice}
+                      $isHighlighted={isExpanded}
                       $isExpanded={isExpanded}
                       onClick={() => {
                         if (isExpanded) {
@@ -179,7 +189,7 @@ const OSDownloadPage = () => {
                         </DeviceInfo>
                         <DeviceActions>
                           <DownloadButton
-                            variant={isCurrentDevice ? "primary" : "outline"}
+                            variant={isExpanded ? "primary" : "outline"}
                             size="sm"
                             disabled={!deviceDownloadUrl}
                             onClick={(e) => {
@@ -447,6 +457,27 @@ const SelectionNote = styled.p`
   background-color: ${(props) => props.theme.colors.background};
   border-radius: ${(props) => props.theme.radii.md};
   border-left: 3px solid ${(props) => props.theme.colors.primary};
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: ${(props) => props.theme.spacing.md};
+  margin-bottom: ${(props) => props.theme.spacing.lg};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: ${(props) => props.theme.radii.md};
+  background-color: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  transition: border-color ${(props) => props.theme.transitions.fast};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.colors.primary};
+  }
+
+  &::placeholder {
+    color: ${(props) => props.theme.colors.textMuted};
+  }
 `;
 
 const DeviceOption = styled.div`

@@ -5,7 +5,7 @@ import { useNostrReleases } from "../../contexts/NostrReleaseContext";
 import { getChannelColor } from "../../styles/theme";
 import {
   getReleaseVersion,
-  getReleaseDate,
+  getReleaseDateWithTime,
   getReleaseChannel,
   getReleaseArchitecture,
   getReleaseProductType,
@@ -24,7 +24,8 @@ const PackageDownloadPage = () => {
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [showAllArchitectures, setShowAllArchitectures] = useState(true);
-  const [expandedArchitecture, setExpandedArchitecture] = useState(releaseId);
+  const [expandedArchitecture, setExpandedArchitecture] = useState(null);
+  const [architectureSearch, setArchitectureSearch] = useState("");
 
   const release = releases.find((r) => r.id === releaseId);
   const alternativeReleases = release
@@ -33,6 +34,13 @@ const PackageDownloadPage = () => {
   
   // Combine current release with alternatives for full architecture list
   const allArchitectures = release ? [release, ...alternativeReleases] : [];
+  
+  // Filter architectures based on search
+  const filteredArchitectures = allArchitectures.filter((archRelease) => {
+    if (!architectureSearch) return true;
+    const archName = getReleaseArchitecture(archRelease).toLowerCase();
+    return archName.includes(architectureSearch.toLowerCase());
+  });
 
   if (!release) {
     return (
@@ -51,7 +59,7 @@ const PackageDownloadPage = () => {
   }
 
   const version = getReleaseVersion(release);
-  const date = getReleaseDate(release);
+  const dateTime = getReleaseDateWithTime(release);
   const channel = getReleaseChannel(release);
   const architecture = getReleaseArchitecture(release);
   const productType = getReleaseProductType(release);
@@ -92,7 +100,7 @@ const PackageDownloadPage = () => {
               <ChannelBadge $color={getChannelColor(channel)}>
                 {channel}
               </ChannelBadge>
-              <ReleasedDate>Released: {date}</ReleasedDate>
+              <ReleasedDate>Released: {dateTime}</ReleasedDate>
             </MetadataRow>
           </TitleSection>
         </ReleaseHeader>
@@ -129,21 +137,23 @@ const PackageDownloadPage = () => {
             <CardHeader>
               <h3>Available Architectures</h3>
               <ArchitectureCount>
-                {allArchitectures.length} {allArchitectures.length === 1 ? "architecture" : "architectures"}
+                {filteredArchitectures.length} of {allArchitectures.length} {allArchitectures.length === 1 ? "architecture" : "architectures"}
               </ArchitectureCount>
             </CardHeader>
             <CardContent>
-              <SelectionNote>
-                Choose the correct architecture for your device. Click to expand for download details.
-              </SelectionNote>
+              <SearchInput
+                type="text"
+                placeholder="Search architectures..."
+                value={architectureSearch}
+                onChange={(e) => setArchitectureSearch(e.target.value)}
+              />
               
               <ArchitecturesList>
-                {allArchitectures.map((archRelease) => {
+                {filteredArchitectures.map((archRelease) => {
                   const isExpanded = expandedArchitecture === archRelease.id;
-                  const isCurrentArch = archRelease.id === releaseId;
                   const archDownloadUrl = getReleaseDownloadUrl(archRelease);
                   const archFileHash = getReleaseFileHash(archRelease);
-                  const archDate = getReleaseDate(archRelease);
+                  const archDate = getReleaseDateWithTime(archRelease);
                   const archChannel = getReleaseChannel(archRelease);
                   const archName = getReleaseArchitecture(archRelease);
                   const archFilename = archDownloadUrl ? archDownloadUrl.split("/").pop() : "package.ipk";
@@ -151,7 +161,7 @@ const PackageDownloadPage = () => {
                   return (
                     <ArchitectureOption
                       key={archRelease.id}
-                      $isHighlighted={isCurrentArch}
+                      $isHighlighted={isExpanded}
                       $isExpanded={isExpanded}
                       onClick={() => {
                         if (isExpanded) {
@@ -178,7 +188,7 @@ const PackageDownloadPage = () => {
                         </ArchitectureInfo>
                         <ArchitectureActions>
                           <DownloadButton
-                            variant={isCurrentArch ? "primary" : "outline"}
+                            variant={isExpanded ? "primary" : "outline"}
                             size="sm"
                             disabled={!archDownloadUrl}
                             onClick={(e) => {
@@ -440,6 +450,27 @@ const SelectionNote = styled.p`
   background-color: ${(props) => props.theme.colors.background};
   border-radius: ${(props) => props.theme.radii.md};
   border-left: 3px solid ${(props) => props.theme.colors.primary};
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: ${(props) => props.theme.spacing.md};
+  margin-bottom: ${(props) => props.theme.spacing.lg};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: ${(props) => props.theme.radii.md};
+  background-color: ${(props) => props.theme.colors.background};
+  color: ${(props) => props.theme.colors.text};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  transition: border-color ${(props) => props.theme.transitions.fast};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.colors.primary};
+  }
+
+  &::placeholder {
+    color: ${(props) => props.theme.colors.textMuted};
+  }
 `;
 
 const ArchitecturesList = styled.div`
