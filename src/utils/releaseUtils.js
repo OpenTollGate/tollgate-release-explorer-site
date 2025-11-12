@@ -46,6 +46,24 @@ export const getReleaseDate = (release) => {
 };
 
 /**
+ * Get the formatted release date and time for a release
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string} A formatted date and time string
+ */
+export const getReleaseDateWithTime = (release) => {
+  if (!release.created_at) return "Unknown";
+  
+  const date = new Date(release.created_at * 1000);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+/**
  * Get the release channel from a release event
  * @param {Object} release - The Nostr event containing release information
  * @returns {string} The release channel
@@ -203,30 +221,13 @@ export const filterReleases = (releases, filters) => {
       if (!filters.products.includes(productType)) return false;
     }
     
-    // Filter by architectures
-    if (filters.architectures && filters.architectures.length > 0) {
-      const architecture = getReleaseArchitecture(release);
-      if (!filters.architectures.includes(architecture)) return false;
-    }
-    
-    // Filter by devices
-    if (filters.devices && filters.devices.length > 0) {
-      const deviceId = getReleaseDeviceId(release);
-      const supportedDevices = getReleaseSupportedDevices(release);
-      
-      const matchesDevice = filters.devices.some(device => 
-        deviceId.includes(device) || supportedDevices.includes(device)
-      );
-      
-      if (!matchesDevice) return false;
-    }
-    
     return true;
   });
 };
 
 /**
- * Deduplicate releases by version and product type, keeping the latest release for each combination
+ * Deduplicate releases by version only, keeping the first release found for each version
+ * This shows one release per version regardless of product type or architecture
  * @param {Array} releases - Array of release events
  * @returns {Array} Deduplicated releases
  */
@@ -237,11 +238,10 @@ export const deduplicateReleases = (releases) => {
   
   releases.forEach(release => {
     const version = getReleaseVersion(release);
-    const productType = getReleaseProductType(release);
-    const key = `${productType}-${version}`;
     
-    if (!releaseMap.has(key) || release.created_at > releaseMap.get(key).created_at) {
-      releaseMap.set(key, release);
+    // Only keep the first release for each version (by creation time)
+    if (!releaseMap.has(version) || release.created_at > releaseMap.get(version).created_at) {
+      releaseMap.set(version, release);
     }
   });
   
@@ -279,12 +279,6 @@ export const getUniqueReleaseValues = (releases, field) => {
     switch (field) {
       case 'channels':
         value = getReleaseChannel(release);
-        break;
-      case 'architectures':
-        value = getReleaseArchitecture(release);
-        break;
-      case 'devices':
-        value = getReleaseDeviceId(release);
         break;
       case 'products':
         value = getReleaseProductType(release);
@@ -358,7 +352,7 @@ export const getReleaseCountText = (releases) => {
     return `${counts.total} releases`;
   }
   
-  return `${counts.total} releases ,${counts.prerelease} pre)`;
+  return `${counts.total} releases ,${counts.prerelease} pre`;
 };
 
 /**

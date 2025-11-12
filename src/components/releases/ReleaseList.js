@@ -3,38 +3,42 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Button from '../common/Button';
 import { getChannelColor } from '../../styles/theme';
+import { PRODUCT_TYPES } from '../../constants';
 import {
   getReleaseVersion,
-  getReleaseDate,
+  getReleaseDateWithTime,
   getReleaseChannel,
-  getReleaseArchitecture,
-  getReleaseDeviceId,
   getReleaseProductType,
   getProductDisplayName,
-  getReleaseDownloadUrl,
-  truncateText
+  getReleaseDownloadUrl
 } from '../../utils/releaseUtils';
 
 const ReleaseList = ({ releases }) => {
   const navigate = useNavigate();
 
-  const handleRowClick = (releaseId) => {
-    navigate(`/download/${releaseId}`);
+  const getDetailRoute = (release) => {
+    const productType = getReleaseProductType(release);
+    if (productType === PRODUCT_TYPES.TOLLGATE_OS) {
+      return `/os/${release.id}`;
+    }
+    return `/package/${release.id}`;
   };
 
-  const handleDownload = (e, releaseId) => {
+  const handleRowClick = (release) => {
+    navigate(getDetailRoute(release));
+  };
+
+  const handleDownload = (e, release) => {
     e.stopPropagation();
-    navigate(`/download/${releaseId}`);
+    navigate(getDetailRoute(release));
   };
 
   return (
     <ListContainer>
       <ListHeader>
-        <HeaderCell width="25%">Product & Version</HeaderCell>
-        <HeaderCell width="15%">Channel</HeaderCell>
-        <HeaderCell width="15%">Date</HeaderCell>
-        <HeaderCell width="20%">Architecture</HeaderCell>
-        <HeaderCell width="15%">Device</HeaderCell>
+        <HeaderCell width="35%">Product & Version</HeaderCell>
+        <HeaderCell width="20%">Channel</HeaderCell>
+        <HeaderCell width="35%">Released</HeaderCell>
         <HeaderCell width="10%" className="hide-mobile">Actions</HeaderCell>
       </ListHeader>
 
@@ -54,24 +58,22 @@ const ReleaseList = ({ releases }) => {
 
 const ReleaseRow = ({ release, onRowClick, onDownload }) => {
   const version = getReleaseVersion(release);
-  const date = getReleaseDate(release);
+  const dateTime = getReleaseDateWithTime(release);
   const channel = getReleaseChannel(release);
-  const architecture = getReleaseArchitecture(release);
-  const deviceId = getReleaseDeviceId(release);
   const productType = getReleaseProductType(release);
   const productName = getProductDisplayName(productType);
   const downloadUrl = getReleaseDownloadUrl(release);
 
   return (
-    <ListRow onClick={() => onRowClick(release.id)}>
-      <ListCell width="25%">
+    <ListRow onClick={() => onRowClick(release)}>
+      <ListCell width="35%">
         <ProductInfo>
           <ProductName>{productName}</ProductName>
           <VersionText>{version}</VersionText>
         </ProductInfo>
       </ListCell>
       
-      <ListCell width="15%">
+      <ListCell width="20%">
         <ChannelContainer>
           <ChannelDot $color={getChannelColor(channel)} className="show-mobile" />
           <ChannelBadge $color={getChannelColor(channel)} className="hide-mobile">
@@ -80,23 +82,15 @@ const ReleaseRow = ({ release, onRowClick, onDownload }) => {
         </ChannelContainer>
       </ListCell>
       
-      <ListCell width="15%">
-        <DateText>{date}</DateText>
-      </ListCell>
-      
-      <ListCell width="20%">
-        <ArchText>{truncateText(architecture, 25)}</ArchText>
-      </ListCell>
-      
-      <ListCell width="15%">
-        <DeviceText>{truncateText(deviceId, 20)}</DeviceText>
+      <ListCell width="35%">
+        <DateText>{dateTime}</DateText>
       </ListCell>
       
       <ListCell width="10%" className="hide-mobile">
         <Button
           variant="primary"
           size="sm"
-          onClick={(e) => onDownload(e, release.id)}
+          onClick={(e) => onDownload(e, release)}
           disabled={!downloadUrl}
         >
           Download
@@ -231,16 +225,5 @@ const DateText = styled.div`
   color: ${props => props.theme.colors.textSecondary};
 `;
 
-const ArchText = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
-  font-family: monospace;
-`;
-
-const DeviceText = styled.div`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
-  font-family: monospace;
-`;
 
 export default ReleaseList;
