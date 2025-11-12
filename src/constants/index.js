@@ -56,10 +56,7 @@ export const DEFAULT_RELAYS = [
 // Filter defaults
 export const DEFAULT_FILTERS = {
   channels: [RELEASE_CHANNELS.STABLE], // Default to stable only
-  products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_WRT, PRODUCT_TYPES.TOLLGATE_BASIC],
-  architectures: [],
-  devices: [],
-  deduplicate: false
+  products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_WRT, PRODUCT_TYPES.TOLLGATE_BASIC]
 };
 
 // Local storage keys

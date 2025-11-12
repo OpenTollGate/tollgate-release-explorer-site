@@ -23,7 +23,6 @@ const PackageDownloadPage = () => {
   const navigate = useNavigate();
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
-  const [showAllArchitectures, setShowAllArchitectures] = useState(true);
   const [expandedArchitecture, setExpandedArchitecture] = useState(null);
   const [architectureSearch, setArchitectureSearch] = useState("");
 
@@ -607,29 +606,6 @@ const ExpandedValue = styled.div`
     background-color: ${(props) => props.theme.colors.cardBackgroundHover};
   }
 `;
-const ShowMoreButton = styled(Button)`
-  margin-top: ${(props) => props.theme.spacing.md};
-  width: 100%;
-`;
-
-const FadeOverlay = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    ${(props) => props.theme.colors.cardBackground}
-  );
-  pointer-events: none;
-`;
-
-
-
-
-
 
 export default PackageDownloadPage;
 const CopyIcon = styled.span`

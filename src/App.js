@@ -11,7 +11,6 @@ import Header from './components/layout/Header';
 import TabSelector from './components/common/TabSelector';
 import FilterBar from './components/filters/FilterBar';
 import ReleaseExplorer from './components/releases/ReleaseExplorer';
-import DownloadPage from './components/download/DownloadPage';
 import OSDownloadPage from './components/download/OSDownloadPage';
 import PackageDownloadPage from './components/download/PackageDownloadPage';
 
@@ -164,10 +163,6 @@ const App = () => {
                   />
                 </MainContent>
               }
-            />
-            <Route
-              path="/download/:releaseId"
-              element={<DownloadPage />}
             />
             <Route
               path="/os/:releaseId"

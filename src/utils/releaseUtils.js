@@ -221,24 +221,6 @@ export const filterReleases = (releases, filters) => {
       if (!filters.products.includes(productType)) return false;
     }
     
-    // Filter by architectures
-    if (filters.architectures && filters.architectures.length > 0) {
-      const architecture = getReleaseArchitecture(release);
-      if (!filters.architectures.includes(architecture)) return false;
-    }
-    
-    // Filter by devices
-    if (filters.devices && filters.devices.length > 0) {
-      const deviceId = getReleaseDeviceId(release);
-      const supportedDevices = getReleaseSupportedDevices(release);
-      
-      const matchesDevice = filters.devices.some(device => 
-        deviceId.includes(device) || supportedDevices.includes(device)
-      );
-      
-      if (!matchesDevice) return false;
-    }
-    
     return true;
   });
 };
@@ -260,29 +242,6 @@ export const deduplicateReleases = (releases) => {
     // Only keep the first release for each version (by creation time)
     if (!releaseMap.has(version) || release.created_at > releaseMap.get(version).created_at) {
       releaseMap.set(version, release);
-    }
-  });
-  
-  return Array.from(releaseMap.values());
-};
-
-/**
- * Deduplicate releases by version and product type, keeping the latest release for each combination
- * @param {Array} releases - Array of release events
- * @returns {Array} Deduplicated releases
- */
-export const deduplicateReleasesByProduct = (releases) => {
-  if (!releases || !Array.isArray(releases)) return [];
-  
-  const releaseMap = new Map();
-  
-  releases.forEach(release => {
-    const version = getReleaseVersion(release);
-    const productType = getReleaseProductType(release);
-    const key = `${productType}-${version}`;
-    
-    if (!releaseMap.has(key) || release.created_at > releaseMap.get(key).created_at) {
-      releaseMap.set(key, release);
     }
   });
   
@@ -320,12 +279,6 @@ export const getUniqueReleaseValues = (releases, field) => {
     switch (field) {
       case 'channels':
         value = getReleaseChannel(release);
-        break;
-      case 'architectures':
-        value = getReleaseArchitecture(release);
-        break;
-      case 'devices':
-        value = getReleaseDeviceId(release);
         break;
       case 'products':
         value = getReleaseProductType(release);

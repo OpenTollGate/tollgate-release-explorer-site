@@ -25,7 +25,6 @@ const OSDownloadPage = () => {
   const navigate = useNavigate();
   const { releases } = useNostrReleases();
   const [showRawEvent, setShowRawEvent] = useState(false);
-  const [showAllDevices, setShowAllDevices] = useState(true);
   const [expandedDevice, setExpandedDevice] = useState(null);
   const [deviceSearch, setDeviceSearch] = useState("");
 
@@ -731,24 +730,6 @@ const AlternativeDownloadButton = styled(Button)`
   font-size: ${(props) => props.theme.fontSizes.xs};
 `;
 
-const FadeOverlay = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    ${(props) => props.theme.colors.cardBackground}
-  );
-  pointer-events: none;
-`;
-
-const ShowMoreButton = styled(Button)`
-  margin-top: ${(props) => props.theme.spacing.md};
-  width: 100%;
-`;
 
 const DetailsCard = styled(Card)``;
 
