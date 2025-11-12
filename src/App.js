@@ -4,18 +4,22 @@ import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
 
 import { theme } from './styles/theme';
-import { VIEW_MODES, DEFAULT_FILTERS } from './constants';
+import { VIEW_MODES, DEFAULT_FILTERS, PRODUCT_CATEGORIES, getProductsByCategory } from './constants';
 import NostrReleaseProvider from './contexts/NostrReleaseContext';
 import Background from './components/common/Background';
 import Header from './components/layout/Header';
+import TabSelector from './components/common/TabSelector';
 import FilterBar from './components/filters/FilterBar';
 import ReleaseExplorer from './components/releases/ReleaseExplorer';
 import DownloadPage from './components/download/DownloadPage';
+import OSDownloadPage from './components/download/OSDownloadPage';
+import PackageDownloadPage from './components/download/PackageDownloadPage';
 
 const App = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [activeCategory, setActiveCategory] = useState(PRODUCT_CATEGORIES.OS);
 
   // Parse filters from URL parameters
   const parseFiltersFromURL = useCallback(() => {
@@ -55,6 +59,12 @@ const App = () => {
     const urlViewMode = searchParams.get('view');
     if (urlViewMode && Object.values(VIEW_MODES).includes(urlViewMode)) {
       setViewMode(urlViewMode);
+    }
+    
+    // Parse category
+    const urlCategory = searchParams.get('category');
+    if (urlCategory && Object.values(PRODUCT_CATEGORIES).includes(urlCategory)) {
+      setActiveCategory(urlCategory);
     }
     
     return urlFilters;
@@ -118,6 +128,29 @@ const App = () => {
     setSearchParams(newSearchParams);
   }, [searchParams, setSearchParams]);
 
+  // Update URL when category changes
+  const handleCategoryChange = useCallback((newCategory) => {
+    setActiveCategory(newCategory);
+    
+    // Update URL parameters
+    const newSearchParams = new URLSearchParams(searchParams);
+    
+    if (newCategory !== PRODUCT_CATEGORIES.OS) {
+      newSearchParams.set('category', newCategory);
+    } else {
+      newSearchParams.delete('category');
+    }
+    
+    setSearchParams(newSearchParams);
+  }, [searchParams, setSearchParams]);
+
+  // Get filtered products based on active category
+  const categoryProducts = getProductsByCategory(activeCategory);
+  const categoryFilters = {
+    ...filters,
+    products: categoryProducts
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <NostrReleaseProvider>
@@ -129,24 +162,41 @@ const App = () => {
           />
           
           <Routes>
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <MainContent>
+                  <TabSelector
+                    activeTab={activeCategory}
+                    onTabChange={handleCategoryChange}
+                    tabs={[
+                      { value: PRODUCT_CATEGORIES.OS, label: 'OS Images' },
+                      { value: PRODUCT_CATEGORIES.PACKAGES, label: 'Packages' }
+                    ]}
+                  />
                   <FilterBar
                     filters={filters}
                     onFiltersChange={handleFiltersChange}
+                    activeCategory={activeCategory}
                   />
-                  <ReleaseExplorer 
+                  <ReleaseExplorer
                     viewMode={viewMode}
-                    filters={filters}
+                    filters={categoryFilters}
                   />
                 </MainContent>
-              } 
+              }
             />
-            <Route 
-              path="/download/:releaseId" 
-              element={<DownloadPage />} 
+            <Route
+              path="/download/:releaseId"
+              element={<DownloadPage />}
+            />
+            <Route
+              path="/os/:releaseId"
+              element={<OSDownloadPage />}
+            />
+            <Route
+              path="/package/:releaseId"
+              element={<PackageDownloadPage />}
             />
           </Routes>
         </AppContainer>

@@ -1,12 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
-import { RELEASE_CHANNELS, PRODUCT_TYPES } from '../../constants';
+import { RELEASE_CHANNELS, PRODUCT_CATEGORIES } from '../../constants';
 import { getUniqueReleaseValues, getReleaseCountText } from '../../utils/releaseUtils';
 import { getChannelColor } from '../../styles/theme';
 import Button from '../common/Button';
 
-const FilterBar = ({ filters, onFiltersChange }) => {
+const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
   const { releases, loading } = useNostrReleases();
 
   // Get unique values for filter options
@@ -28,7 +28,7 @@ const FilterBar = ({ filters, onFiltersChange }) => {
   const clearAllFilters = () => {
     onFiltersChange({
       channels: [RELEASE_CHANNELS.STABLE], // Keep stable as default
-      products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_WRT],
+      products: filters.products, // Keep current products (controlled by tabs)
       architectures: [],
       devices: [],
       deduplicate: false
@@ -102,24 +102,8 @@ const FilterBar = ({ filters, onFiltersChange }) => {
           </FilterGroup>
         </FilterSection>
 
-        {/* Product Types */}
-        <FilterSection>
-          <SectionTitle>Products</SectionTitle>
-          <FilterGroup>
-            {Object.values(PRODUCT_TYPES).map(product => (
-              <FilterChip
-                key={product}
-                $active={filters.products.includes(product)}
-                onClick={() => updateFilter('products', product)}
-              >
-                {product === PRODUCT_TYPES.TOLLGATE_OS ? 'TollGate OS' : 'TollGate WRT'}
-              </FilterChip>
-            ))}
-          </FilterGroup>
-        </FilterSection>
-
-        {/* Architectures */}
-        {availableArchitectures.length > 0 && (
+        {/* Architectures - Only show for Packages category */}
+        {activeCategory === PRODUCT_CATEGORIES.PACKAGES && availableArchitectures.length > 0 && (
           <FilterSection>
             <SectionTitle>Architectures</SectionTitle>
             <FilterGroup>
@@ -136,8 +120,8 @@ const FilterBar = ({ filters, onFiltersChange }) => {
           </FilterSection>
         )}
 
-        {/* Devices */}
-        {availableDevices.length > 0 && (
+        {/* Devices - Only show for OS category */}
+        {activeCategory === PRODUCT_CATEGORIES.OS && availableDevices.length > 0 && (
           <FilterSection>
             <SectionTitle>Devices</SectionTitle>
             <FilterGroup>

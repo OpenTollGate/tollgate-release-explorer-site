@@ -16,6 +16,27 @@ export const RELEASE_CHANNELS = {
 export const PRODUCT_TYPES = {
   TOLLGATE_OS: 'tollgate-os',
   TOLLGATE_WRT: 'tollgate-wrt',
+  TOLLGATE_BASIC: 'tollgate-module-basic-go',
+};
+
+// Product categories for tabs
+export const PRODUCT_CATEGORIES = {
+  OS: 'os',
+  PACKAGES: 'packages'
+};
+
+// Mapping of product types to categories
+export const PRODUCT_CATEGORY_MAP = {
+  [PRODUCT_TYPES.TOLLGATE_OS]: PRODUCT_CATEGORIES.OS,
+  [PRODUCT_TYPES.TOLLGATE_WRT]: PRODUCT_CATEGORIES.PACKAGES,
+  [PRODUCT_TYPES.TOLLGATE_BASIC]: PRODUCT_CATEGORIES.PACKAGES,
+};
+
+// Get products by category
+export const getProductsByCategory = (category) => {
+  return Object.entries(PRODUCT_CATEGORY_MAP)
+    .filter(([_, cat]) => cat === category)
+    .map(([product]) => product);
 };
 
 // View modes

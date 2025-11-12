@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import Card, { CardHeader, CardContent, CardFooter } from '../common/Card';
 import Button from '../common/Button';
 import { getChannelColor } from '../../styles/theme';
+import { PRODUCT_TYPES } from '../../constants';
 import {
   getReleaseVersion,
   getReleaseDate,
@@ -31,13 +32,21 @@ const ReleaseCard = ({ release }) => {
   const productName = getProductDisplayName(productType);
   const downloadUrl = getReleaseDownloadUrl(release);
 
+  // Determine the correct route based on product type
+  const getDetailRoute = () => {
+    if (productType === PRODUCT_TYPES.TOLLGATE_OS) {
+      return `/os/${release.id}`;
+    }
+    return `/package/${release.id}`;
+  };
+
   const handleCardClick = () => {
-    navigate(`/download/${release.id}`);
+    navigate(getDetailRoute());
   };
 
   const handleDownload = (e) => {
     e.stopPropagation();
-    navigate(`/download/${release.id}`);
+    navigate(getDetailRoute());
   };
 
   const toggleDetails = (e) => {

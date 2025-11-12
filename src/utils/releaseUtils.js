@@ -226,11 +226,34 @@ export const filterReleases = (releases, filters) => {
 };
 
 /**
- * Deduplicate releases by version and product type, keeping the latest release for each combination
+ * Deduplicate releases by version only, keeping the first release found for each version
+ * This shows one release per version regardless of product type or architecture
  * @param {Array} releases - Array of release events
  * @returns {Array} Deduplicated releases
  */
 export const deduplicateReleases = (releases) => {
+  if (!releases || !Array.isArray(releases)) return [];
+  
+  const releaseMap = new Map();
+  
+  releases.forEach(release => {
+    const version = getReleaseVersion(release);
+    
+    // Only keep the first release for each version (by creation time)
+    if (!releaseMap.has(version) || release.created_at > releaseMap.get(version).created_at) {
+      releaseMap.set(version, release);
+    }
+  });
+  
+  return Array.from(releaseMap.values());
+};
+
+/**
+ * Deduplicate releases by version and product type, keeping the latest release for each combination
+ * @param {Array} releases - Array of release events
+ * @returns {Array} Deduplicated releases
+ */
+export const deduplicateReleasesByProduct = (releases) => {
   if (!releases || !Array.isArray(releases)) return [];
   
   const releaseMap = new Map();
