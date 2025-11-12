@@ -623,8 +623,8 @@ const AlternativesContainer = styled.div`
 `;
 
 const AlternativesList = styled.div`
-  max-height: ${(props) => (props.$showAll ? "none" : "600px")};
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
   position: relative;
 `;
 
