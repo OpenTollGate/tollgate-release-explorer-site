@@ -1,4 +1,0 @@
-- 'bakc to explorer' does not restore filters
-- release date should include time
-- filter without including dev builds by default.
-- cmd/ctrl click should open in new tab
