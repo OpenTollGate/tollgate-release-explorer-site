@@ -8,12 +8,11 @@ import ReleaseList from './ReleaseList';
 const ReleaseExplorer = ({ viewMode, filters }) => {
   const { releases, loading, error, showEmptyState } = useNostrReleases();
 
-  // Filter, deduplicate if needed, and sort releases
+  // Filter, deduplicate (always enabled), and sort releases
   let filteredReleases = filterReleases(releases, filters);
   
-  if (filters.deduplicate) {
-    filteredReleases = deduplicateReleases(filteredReleases);
-  }
+  // Always deduplicate to show only one version per release
+  filteredReleases = deduplicateReleases(filteredReleases);
   
   const sortedReleases = sortReleasesByDate(filteredReleases);
 

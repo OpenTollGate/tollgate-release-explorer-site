@@ -46,6 +46,24 @@ export const getReleaseDate = (release) => {
 };
 
 /**
+ * Get the formatted release date and time for a release
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string} A formatted date and time string
+ */
+export const getReleaseDateWithTime = (release) => {
+  if (!release.created_at) return "Unknown";
+  
+  const date = new Date(release.created_at * 1000);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+/**
  * Get the release channel from a release event
  * @param {Object} release - The Nostr event containing release information
  * @returns {string} The release channel

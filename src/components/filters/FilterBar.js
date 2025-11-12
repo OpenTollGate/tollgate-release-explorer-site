@@ -10,7 +10,6 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
   const { releases, loading } = useNostrReleases();
 
   // Get unique values for filter options
-  const availableArchitectures = getUniqueReleaseValues(releases, 'architectures');
   const availableDevices = getUniqueReleaseValues(releases, 'devices');
 
   const updateFilter = (filterType, value) => {
@@ -29,22 +28,12 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
     onFiltersChange({
       channels: [RELEASE_CHANNELS.STABLE], // Keep stable as default
       products: filters.products, // Keep current products (controlled by tabs)
-      architectures: [],
-      devices: [],
-      deduplicate: false
-    });
-  };
-
-  const toggleDeduplicate = () => {
-    onFiltersChange({
-      ...filters,
-      deduplicate: !filters.deduplicate
+      devices: []
     });
   };
 
   const hasActiveFilters = () => {
-    return filters.architectures.length > 0 || 
-           filters.devices.length > 0 ||
+    return filters.devices.length > 0 ||
            filters.channels.length !== 1 ||
            !filters.channels.includes(RELEASE_CHANNELS.STABLE);
   };
@@ -74,16 +63,6 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
         )}
       </FilterHeader>
 
-      {/* Show Only Unique Versions Toggle */}
-      <UniqueVersionsToggle>
-        <CompactToggle>
-          <CompactToggleLabel>Show only unique versions</CompactToggleLabel>
-          <CompactToggleSwitch $active={filters.deduplicate} onClick={toggleDeduplicate}>
-            <CompactToggleSlider $active={filters.deduplicate} />
-          </CompactToggleSwitch>
-        </CompactToggle>
-      </UniqueVersionsToggle>
-
       <FilterSections>
         {/* Release Channels */}
         <FilterSection>
@@ -101,24 +80,6 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
             ))}
           </FilterGroup>
         </FilterSection>
-
-        {/* Architectures - Only show for Packages category */}
-        {activeCategory === PRODUCT_CATEGORIES.PACKAGES && availableArchitectures.length > 0 && (
-          <FilterSection>
-            <SectionTitle>Architectures</SectionTitle>
-            <FilterGroup>
-              {availableArchitectures.map(arch => (
-                <FilterChip
-                  key={arch}
-                  $active={filters.architectures.includes(arch)}
-                  onClick={() => updateFilter('architectures', arch)}
-                >
-                  {arch}
-                </FilterChip>
-              ))}
-            </FilterGroup>
-          </FilterSection>
-        )}
 
         {/* Devices - Only show for OS category */}
         {activeCategory === PRODUCT_CATEGORIES.OS && availableDevices.length > 0 && (
@@ -238,52 +199,6 @@ const MoreIndicator = styled.span`
   font-size: ${props => props.theme.fontSizes.sm};
   padding: ${props => props.theme.spacing.xs} ${props => props.theme.spacing.md};
   font-style: italic;
-`;
-
-const UniqueVersionsToggle = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: ${props => props.theme.spacing.lg};
-  padding-bottom: ${props => props.theme.spacing.md};
-  border-bottom: 1px solid ${props => props.theme.colors.border};
-`;
-
-const CompactToggle = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${props => props.theme.spacing.sm};
-`;
-
-const CompactToggleLabel = styled.label`
-  font-size: ${props => props.theme.fontSizes.sm};
-  color: ${props => props.theme.colors.textSecondary};
-  cursor: pointer;
-`;
-
-const CompactToggleSwitch = styled.button`
-  position: relative;
-  width: 32px;
-  height: 18px;
-  background-color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.border};
-  border: none;
-  border-radius: 9px;
-  cursor: pointer;
-  transition: background-color ${props => props.theme.transitions.fast};
-  
-  &:hover {
-    background-color: ${props => props.$active ? props.theme.colors.primaryDark : props.theme.colors.borderLight};
-  }
-`;
-
-const CompactToggleSlider = styled.div`
-  position: absolute;
-  top: 2px;
-  left: ${props => props.$active ? '16px' : '2px'};
-  width: 14px;
-  height: 14px;
-  background-color: white;
-  border-radius: 50%;
-  transition: left ${props => props.theme.transitions.fast};
 `;
 
 export default FilterBar;

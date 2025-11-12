@@ -37,22 +37,10 @@ const App = () => {
       urlFilters.products = products.split(',').filter(Boolean);
     }
     
-    // Parse architectures
-    const architectures = searchParams.get('architectures');
-    if (architectures) {
-      urlFilters.architectures = architectures.split(',').filter(Boolean);
-    }
-    
     // Parse devices
     const devices = searchParams.get('devices');
     if (devices) {
       urlFilters.devices = devices.split(',').filter(Boolean);
-    }
-    
-    // Parse deduplicate
-    const deduplicate = searchParams.get('deduplicate');
-    if (deduplicate !== null) {
-      urlFilters.deduplicate = deduplicate === 'true';
     }
     
     // Parse view mode
@@ -92,16 +80,8 @@ const App = () => {
       newSearchParams.set('products', newFilters.products.join(','));
     }
     
-    if (newFilters.architectures.length > 0) {
-      newSearchParams.set('architectures', newFilters.architectures.join(','));
-    }
-    
     if (newFilters.devices.length > 0) {
       newSearchParams.set('devices', newFilters.devices.join(','));
-    }
-    
-    if (newFilters.deduplicate) {
-      newSearchParams.set('deduplicate', 'true');
     }
     
     // Add view mode to URL
