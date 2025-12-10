@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { getChannelColor } from "../../styles/theme";
 import {
   getReleaseDownloadUrl,
   getReleaseFileHash,
   getReleaseDateWithTime,
   getReleaseChannel,
-  getReleaseCompression,
 } from "../../utils/releaseUtils";
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
