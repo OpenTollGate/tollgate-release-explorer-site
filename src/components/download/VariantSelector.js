@@ -5,6 +5,7 @@ import {
   getReleaseFileHash,
   getReleaseDateWithTime,
   getReleaseChannel,
+  getReleaseCompression,
 } from "../../utils/releaseUtils";
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
@@ -41,14 +42,15 @@ import {
 /**
  * VariantSelector - A reusable component for selecting and displaying variants
  * (architectures or devices) of a release
- * 
+ *
  * @param {Object} props
  * @param {string} props.title - Title for the card (e.g., "Available Architectures")
- * @param {Array} props.variants - Array of release objects representing variants
+ * @param {Array} props.variants - Array of release objects or architecture groups
  * @param {Function} props.getVariantName - Function to extract variant name from release
  * @param {string} props.searchPlaceholder - Placeholder text for search input
  * @param {string} props.singularLabel - Singular form of variant type (e.g., "architecture")
  * @param {string} props.pluralLabel - Plural form of variant type (e.g., "architectures")
+ * @param {boolean} props.hasCompressionVariants - Whether variants have compression options
  */
 const VariantSelector = ({
   title,
@@ -57,15 +59,19 @@ const VariantSelector = ({
   searchPlaceholder,
   singularLabel,
   pluralLabel,
+  hasCompressionVariants = false,
 }) => {
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [expandedVariant, setExpandedVariant] = useState(null);
+  const [selectedCompression, setSelectedCompression] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter variants based on search
   const filteredVariants = variants.filter((variant) => {
     if (!searchQuery) return true;
-    const variantName = getVariantName(variant).toLowerCase();
+    const variantName = hasCompressionVariants
+      ? variant.architecture.toLowerCase()
+      : getVariantName(variant).toLowerCase();
     return variantName.includes(searchQuery.toLowerCase());
   });
 
@@ -92,26 +98,46 @@ const VariantSelector = ({
 
         <VariantsList>
           {filteredVariants.map((variant) => {
-            const isExpanded = expandedVariant === variant.id;
-            const downloadUrl = getReleaseDownloadUrl(variant);
-            const fileHash = getReleaseFileHash(variant);
-            const dateTime = getReleaseDateWithTime(variant);
-            const channel = getReleaseChannel(variant);
-            const variantName = getVariantName(variant);
+            // Handle both grouped (with compression variants) and ungrouped variants
+            const variantId = hasCompressionVariants ? variant.architecture : variant.id;
+            const isExpanded = expandedVariant === variantId;
+            
+            // For compression variants, get the selected compression or default to 'none'
+            const selectedComp = hasCompressionVariants
+              ? (selectedCompression[variantId] || 'none')
+              : null;
+            
+            // Get the actual release object
+            const release = hasCompressionVariants
+              ? variant.compressionVariants.find(cv => cv.compression === selectedComp)?.release
+              : variant;
+            
+            const downloadUrl = getReleaseDownloadUrl(release);
+            const fileHash = getReleaseFileHash(release);
+            const dateTime = getReleaseDateWithTime(release);
+            const channel = getReleaseChannel(release);
+            const variantName = hasCompressionVariants ? variant.architecture : getVariantName(variant);
             const filename = downloadUrl
               ? downloadUrl.split("/").pop()
               : "file";
 
             return (
               <VariantOption
-                key={variant.id}
+                key={variantId}
                 $isHighlighted={isExpanded}
                 $isExpanded={isExpanded}
                 onClick={() => {
                   if (isExpanded) {
                     setExpandedVariant(null);
                   } else {
-                    setExpandedVariant(variant.id);
+                    setExpandedVariant(variantId);
+                    // Initialize compression selection if not set
+                    if (hasCompressionVariants && !selectedCompression[variantId]) {
+                      setSelectedCompression(prev => ({
+                        ...prev,
+                        [variantId]: 'none'
+                      }));
+                    }
                   }
                 }}
               >
@@ -153,6 +179,30 @@ const VariantSelector = ({
 
                 {isExpanded && (
                   <VariantExpandedContent>
+                    {hasCompressionVariants && variant.compressionVariants.length > 1 && (
+                      <ExpandedSection>
+                        <ExpandedTitle>Compression Type</ExpandedTitle>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                          {variant.compressionVariants.map(({ compression }) => (
+                            <Button
+                              key={compression}
+                              variant={selectedComp === compression ? 'primary' : 'outline'}
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCompression(prev => ({
+                                  ...prev,
+                                  [variantId]: compression
+                                }));
+                              }}
+                            >
+                              {compression}
+                            </Button>
+                          ))}
+                        </div>
+                      </ExpandedSection>
+                    )}
+                    
                     {(downloadUrl || fileHash) && (
                       <ExpandedSection>
                         <ExpandedTitle>Download & Verification</ExpandedTitle>
@@ -222,13 +272,13 @@ const VariantSelector = ({
                           <RawEventText>
                             {JSON.stringify(
                               {
-                                id: variant.id,
-                                pubkey: variant.pubkey,
-                                created_at: variant.created_at,
-                                kind: variant.kind,
-                                tags: variant.tags,
-                                content: variant.content,
-                                sig: variant.sig,
+                                id: release.id,
+                                pubkey: release.pubkey,
+                                created_at: release.created_at,
+                                kind: release.kind,
+                                tags: release.tags,
+                                content: release.content,
+                                sig: release.sig,
                               },
                               null,
                               2

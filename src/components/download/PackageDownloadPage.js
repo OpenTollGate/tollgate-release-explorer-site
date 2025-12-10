@@ -11,6 +11,7 @@ import {
   getProductDisplayName,
   getReleaseDownloadUrl,
   findAlternativeReleases,
+  groupReleasesByArchitecture,
 } from "../../utils/releaseUtils";
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
@@ -44,8 +45,9 @@ const PackageDownloadPage = () => {
     ? findAlternativeReleases(releases, release)
     : [];
 
-  // Combine current release with alternatives for full architecture list
-  const allArchitectures = release ? [release, ...alternativeReleases] : [];
+  // Combine current release with alternatives and group by architecture
+  const allReleases = release ? [release, ...alternativeReleases] : [];
+  const groupedArchitectures = groupReleasesByArchitecture(allReleases);
 
   if (!release) {
     return (
@@ -127,11 +129,12 @@ const PackageDownloadPage = () => {
 
           <VariantSelector
             title="Available Architectures"
-            variants={allArchitectures}
+            variants={groupedArchitectures}
             getVariantName={getReleaseArchitecture}
             searchPlaceholder="Search architectures..."
             singularLabel="architecture"
             pluralLabel="architectures"
+            hasCompressionVariants={true}
           />
         </MainContent>
     </PageContainer>

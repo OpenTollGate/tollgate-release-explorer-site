@@ -82,6 +82,15 @@ export const getReleaseArchitecture = (release) => {
 };
 
 /**
+ * Get compression type for a release
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string} The compression type or "none"
+ */
+export const getReleaseCompression = (release) => {
+  return getMatchingTags(release, "compression")?.[0]?.[1] || "none";
+};
+
+/**
  * Get OpenWRT version details
  * @param {Object} release - The Nostr event containing release information
  * @returns {string} The OpenWRT version or "Unknown"
@@ -390,6 +399,51 @@ export const findAlternativeReleases = (releases, currentRelease) => {
     const architecture = getReleaseArchitecture(release);
     return architecture !== currentArchitecture;
   });
+};
+
+/**
+ * Group releases by architecture, with compression variants for each architecture
+ * @param {Array} releases - Array of release events
+ * @returns {Array} Array of architecture groups with compression variants
+ */
+export const groupReleasesByArchitecture = (releases) => {
+  if (!releases || !Array.isArray(releases)) return [];
+  
+  const architectureMap = new Map();
+  
+  releases.forEach(release => {
+    const architecture = getReleaseArchitecture(release);
+    const compression = getReleaseCompression(release);
+    
+    if (!architectureMap.has(architecture)) {
+      architectureMap.set(architecture, {
+        architecture,
+        compressionVariants: new Map() // Use Map to deduplicate by compression type
+      });
+    }
+    
+    const archGroup = architectureMap.get(architecture);
+    
+    // Only add if this compression type hasn't been added yet, or if it's newer
+    if (!archGroup.compressionVariants.has(compression) ||
+        release.created_at > archGroup.compressionVariants.get(compression).created_at) {
+      archGroup.compressionVariants.set(compression, release);
+    }
+  });
+  
+  // Convert Maps to arrays and sort compression variants
+  const result = Array.from(architectureMap.values()).map(group => ({
+    architecture: group.architecture,
+    compressionVariants: Array.from(group.compressionVariants.entries())
+      .map(([compression, release]) => ({ compression, release }))
+      .sort((a, b) => {
+        if (a.compression === 'none') return -1;
+        if (b.compression === 'none') return 1;
+        return a.compression.localeCompare(b.compression);
+      })
+  }));
+  
+  return result;
 };
 
 /**
