@@ -107,9 +107,21 @@ const VariantSelector = ({
               : null;
             
             // Get the actual release object
-            const release = hasCompressionVariants
-              ? variant.compressionVariants.find(cv => cv.compression === selectedComp)?.release
-              : variant;
+            let release;
+            if (hasCompressionVariants) {
+              // Try to find the selected compression variant
+              const selectedVariant = variant.compressionVariants.find(cv => cv.compression === selectedComp);
+              // Fallback to first variant if selected not found
+              release = selectedVariant?.release || variant.compressionVariants[0]?.release;
+            } else {
+              release = variant;
+            }
+            
+            // Safety check: skip if release is still undefined
+            if (!release) {
+              console.warn('No release found for variant:', variant);
+              return null;
+            }
             
             const downloadUrl = getReleaseDownloadUrl(release);
             const fileHash = getReleaseFileHash(release);
