@@ -23,10 +23,12 @@ const ReleaseCard = ({ release }) => {
 
   // Determine the correct route based on product type
   const getDetailRoute = () => {
-    if (productType === PRODUCT_TYPES.TOLLGATE_OS) {
-      return `/os/${release.id}`;
-    }
-    return `/package/${release.id}`;
+    const baseRoute = productType === PRODUCT_TYPES.TOLLGATE_OS
+      ? `/os/${release.id}`
+      : `/package/${release.id}`;
+    
+    // Add channel as query parameter to ensure it can be found
+    return `${baseRoute}?channel=${channel}`;
   };
 
   const handleCardClick = () => {

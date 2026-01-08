@@ -19,6 +19,9 @@ const App = () => {
   const [viewMode, setViewMode] = useState(VIEW_MODES.GRID);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [activeCategory, setActiveCategory] = useState(PRODUCT_CATEGORIES.PACKAGES);
+  
+  // Get channel from URL if present (for detail pages)
+  const urlChannel = searchParams.get('channel');
 
   // Parse filters from URL parameters
   const parseFiltersFromURL = useCallback(() => {
@@ -129,10 +132,24 @@ const App = () => {
     ...filters,
     products: categoryProducts
   };
+  
+  // Determine channel filters based on category
+  // OS releases don't have the 'c' tag, so omit channel filter for OS category
+  let channelFilters;
+  if (activeCategory === PRODUCT_CATEGORIES.OS) {
+    // For OS, don't filter by channel at all
+    channelFilters = undefined;
+  } else {
+    // For packages, use channel filters
+    // If we have a channel from URL (detail page), ensure it's included
+    channelFilters = urlChannel && !filters.channels?.includes(urlChannel)
+      ? [...(filters.channels || []), urlChannel]
+      : filters.channels;
+  }
 
   return (
     <ThemeProvider theme={theme}>
-      <NostrReleaseProvider channelFilters={filters.channels}>
+      <NostrReleaseProvider channelFilters={channelFilters}>
         <AppContainer>
           <Background />
           <Header />

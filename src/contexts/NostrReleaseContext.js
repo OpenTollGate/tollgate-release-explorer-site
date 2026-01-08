@@ -79,17 +79,21 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
         }
 
         // Create filter for NIP-94 events from the specified publisher
-        // Only include channel filter if channels are specified
         const filter = {
           kinds: [NIP94_KIND],
           authors: [currentPubkey],
           limit: 5000
         };
         
-        // Add channel filter only if specific channels are selected
-        // Default to stable if no channels specified
-        const channels = channelFilters && channelFilters.length > 0 ? channelFilters : ['stable'];
-        filter["#c"] = channels;
+        // Add channel filter only if channelFilters is defined and has values
+        // undefined means don't filter by channel (e.g., for OS releases that don't have 'c' tag)
+        if (channelFilters !== undefined && channelFilters.length > 0) {
+          filter["#c"] = channelFilters;
+        } else if (channelFilters !== undefined) {
+          // If channelFilters is defined but empty, default to stable
+          filter["#c"] = ['stable'];
+        }
+        // If channelFilters is undefined, don't add channel filter at all
         
         console.log("NostrReleaseProvider: Filter:", filter);
         
