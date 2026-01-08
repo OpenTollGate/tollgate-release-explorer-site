@@ -18,7 +18,7 @@ const NostrReleaseContext = createContext({
 // Custom hook to use the context
 export const useNostrReleases = () => useContext(NostrReleaseContext);
 
-const NostrReleaseProvider = ({ children }) => {
+const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
   const [releases, setReleases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,6 @@ const NostrReleaseProvider = ({ children }) => {
 
   // Handle new release events
   const handleReleaseEvent = useCallback((event) => {
-    console.log("NostrReleaseProvider: Received new release event:", event.id);
     
     // Ensure AppleSauce events have getMatchingTags method for compatibility
     if (!event.getMatchingTags) {
@@ -56,7 +55,7 @@ const NostrReleaseProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Set up subscription when pubkey changes
+  // Set up subscription when pubkey or channel filters change
   useEffect(() => {
     if (!currentPubkey) return;
 
@@ -80,11 +79,17 @@ const NostrReleaseProvider = ({ children }) => {
         }
 
         // Create filter for NIP-94 events from the specified publisher
+        // Only include channel filter if channels are specified
         const filter = {
           kinds: [NIP94_KIND],
           authors: [currentPubkey],
           limit: 5000
         };
+        
+        // Add channel filter only if specific channels are selected
+        // Default to stable if no channels specified
+        const channels = channelFilters && channelFilters.length > 0 ? channelFilters : ['stable'];
+        filter["#c"] = channels;
         
         console.log("NostrReleaseProvider: Filter:", filter);
         
@@ -136,7 +141,7 @@ const NostrReleaseProvider = ({ children }) => {
         }
       }
     };
-  }, [currentPubkey, handleReleaseEvent]);
+  }, [currentPubkey, channelFilters, handleReleaseEvent]);
 
   // Function to manually refetch releases
   const refetch = useCallback(() => {

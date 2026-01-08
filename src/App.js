@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useSearchParams } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
@@ -71,15 +71,15 @@ const App = () => {
     const newSearchParams = new URLSearchParams();
     
     // Add filters to URL
-    if (newFilters.channels.length > 0) {
+    if (newFilters.channels && newFilters.channels.length > 0) {
       newSearchParams.set('channels', newFilters.channels.join(','));
     }
     
-    if (newFilters.products.length > 0) {
+    if (newFilters.products && newFilters.products.length > 0) {
       newSearchParams.set('products', newFilters.products.join(','));
     }
     
-    if (newFilters.devices.length > 0) {
+    if (newFilters.devices && newFilters.devices.length > 0) {
       newSearchParams.set('devices', newFilters.devices.join(','));
     }
     
@@ -132,7 +132,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NostrReleaseProvider>
+      <NostrReleaseProvider channelFilters={filters.channels}>
         <AppContainer>
           <Background />
           <Header />

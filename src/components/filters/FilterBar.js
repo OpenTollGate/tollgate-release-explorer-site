@@ -29,8 +29,9 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
   };
 
   const hasActiveFilters = () => {
-    return filters.channels.length !== 1 ||
-           !filters.channels.includes(RELEASE_CHANNELS.STABLE);
+    const channels = filters.channels || [];
+    return channels.length !== 1 ||
+           !channels.includes(RELEASE_CHANNELS.STABLE);
   };
 
   if (loading) {
@@ -88,7 +89,7 @@ const FilterBar = ({ filters, onFiltersChange, activeCategory }) => {
               {Object.values(RELEASE_CHANNELS).map(channel => (
                 <FilterChip
                   key={channel}
-                  $active={filters.channels.includes(channel)}
+                  $active={(filters.channels || []).includes(channel)}
                   $color={getChannelColor(channel)}
                   onClick={() => updateFilter('channels', channel)}
                 >
