@@ -20,13 +20,13 @@ const getMatchingTags = (release, tagName) => {
  * @returns {string} A formatted version string
  */
 export const getReleaseVersion = (release) => {
-  // Prefer new standardized 'version' tag
-  const version = getTagValue(release, "version")
-  if (version) return version;
+  // Check for 'v' tag (new standard for both OS and packages)
+  const vTag = getTagValue(release, "v");
+  if (vTag) return vTag;
+  
   
   // Fallback to deprecated format tags
-  return getTagValue(release, "tollgate_os_version") ||
-         release.id?.substring(0, 8) || 'Unknown';
+  return 'Unknown'
 };
 
 /**
@@ -69,7 +69,11 @@ export const getReleaseDateWithTime = (release) => {
  * @returns {string} The release channel
  */
 export const getReleaseChannel = (release) => {
-  return getMatchingTags(release, "release_channel")?.[0]?.[1] || 'dev';
+  // Check for 'c' tag (new standard)
+  const cTag = getMatchingTags(release, "c")?.[0]?.[1];
+  if (cTag) return cTag;
+  
+  return 'unknown';
 };
 
 /**

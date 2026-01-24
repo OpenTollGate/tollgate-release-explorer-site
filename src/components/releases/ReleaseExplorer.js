@@ -16,7 +16,8 @@ const ReleaseExplorer = ({ viewMode, filters }) => {
   
   const sortedReleases = sortReleasesByDate(filteredReleases);
 
-  if (loading) {
+  // Show loading only if we're actually loading AND haven't shown empty state yet
+  if (loading && !showEmptyState) {
     return (
       <ExplorerContainer>
         <LoadingState>
@@ -40,32 +41,20 @@ const ReleaseExplorer = ({ viewMode, filters }) => {
   }
 
   if (sortedReleases.length === 0) {
-    if (showEmptyState) {
-      return (
-        <ExplorerContainer>
-          <EmptyState>
-            <EmptyIcon>📦</EmptyIcon>
-            <EmptyTitle>No releases found (yet)</EmptyTitle>
-            <EmptyMessage>
-              {releases.length === 0
-                ? "No releases are available from this publisher."
-                : "No releases match your current filters. Try adjusting your filter criteria."
-              }
-            </EmptyMessage>
-          </EmptyState>
-        </ExplorerContainer>
-      );
-    } else {
-      // Show loading spinner while waiting for the 5-second timer
-      return (
-        <ExplorerContainer>
-          <LoadingState>
-            <LoadingSpinner />
-            <LoadingText>Loading releases...</LoadingText>
-          </LoadingState>
-        </ExplorerContainer>
-      );
-    }
+    return (
+      <ExplorerContainer>
+        <EmptyState>
+          <EmptyIcon>📦</EmptyIcon>
+          <EmptyTitle>No releases found</EmptyTitle>
+          <EmptyMessage>
+            {releases.length === 0
+              ? "No releases are available from this publisher."
+              : "No releases match your current filters. Try adjusting your filter criteria."
+            }
+          </EmptyMessage>
+        </EmptyState>
+      </ExplorerContainer>
+    );
   }
 
   return (

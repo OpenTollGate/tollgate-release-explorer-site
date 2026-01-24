@@ -86,7 +86,6 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
         };
         
         // Add channel filter only if channelFilters is defined and has values
-        // undefined means don't filter by channel (e.g., for OS releases that don't have 'c' tag)
         if (channelFilters !== undefined && channelFilters.length > 0) {
           filter["#c"] = channelFilters;
         } else if (channelFilters !== undefined) {
@@ -106,13 +105,15 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
           )
           .subscribe(handleReleaseEvent);
         
-        // Set a 5-second timer to show empty state if no events are received
+        // Set a 5-second timer to stop loading and potentially show empty state
+        // The stream remains open and events can still arrive after this
         const emptyStateTimer = setTimeout(() => {
+          console.log("NostrReleaseProvider: 5 seconds elapsed, stopping loading spinner");
+          setLoading(false);
           setReleases(prevReleases => {
             if (prevReleases.length === 0) {
-              console.log("NostrReleaseProvider: No events received after 5 seconds, showing empty state");
+              console.log("NostrReleaseProvider: No events received, showing empty state");
               setShowEmptyState(true);
-              setLoading(false);
             }
             return prevReleases;
           });

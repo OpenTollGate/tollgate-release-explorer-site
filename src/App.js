@@ -133,19 +133,11 @@ const App = () => {
     products: categoryProducts
   };
   
-  // Determine channel filters based on category
-  // OS releases don't have the 'c' tag, so omit channel filter for OS category
-  let channelFilters;
-  if (activeCategory === PRODUCT_CATEGORIES.OS) {
-    // For OS, don't filter by channel at all
-    channelFilters = undefined;
-  } else {
-    // For packages, use channel filters
-    // If we have a channel from URL (detail page), ensure it's included
-    channelFilters = urlChannel && !filters.channels?.includes(urlChannel)
-      ? [...(filters.channels || []), urlChannel]
-      : filters.channels;
-  }
+  // If we have a channel from URL (detail page), ensure it's included in channel filters
+  // Both OS and packages now use the same channel structure
+  const channelFilters = urlChannel && !filters.channels?.includes(urlChannel)
+    ? [...(filters.channels || []), urlChannel]
+    : filters.channels;
 
   return (
     <ThemeProvider theme={theme}>
