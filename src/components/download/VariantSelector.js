@@ -283,7 +283,7 @@ const VariantSelector = ({
                       </Button>
 
                       {showRawEvent && (
-                        <RawEventSection>
+                        <RawEventSection onClick={(e) => e.stopPropagation()}>
                           <RawEventText>
                             {JSON.stringify(
                               {
