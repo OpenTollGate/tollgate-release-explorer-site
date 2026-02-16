@@ -10,6 +10,7 @@ import {
   getReleaseProductType,
   getProductDisplayName,
   findAlternativeReleases,
+  groupReleasesByDevice,
 } from "../../utils/releaseUtils";
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
@@ -43,8 +44,9 @@ const OSDownloadPage = () => {
     ? findAlternativeReleases(releases, release)
     : [];
 
-  // Combine current release with alternatives for full device list
-  const allDevices = release ? [release, ...alternativeReleases] : [];
+  // Combine current release with alternatives and group by device
+  const allReleases = release ? [release, ...alternativeReleases] : [];
+  const groupedDevices = groupReleasesByDevice(allReleases);
 
   if (!release) {
     return (
@@ -123,11 +125,12 @@ const OSDownloadPage = () => {
 
           <VariantSelector
             title="Available Devices"
-            variants={allDevices}
+            variants={groupedDevices}
             getVariantName={getReleaseDeviceId}
             searchPlaceholder="Search devices..."
             singularLabel="device"
             pluralLabel="devices"
+            hasCompressionVariants={true}
           />
 
         </MainContent>

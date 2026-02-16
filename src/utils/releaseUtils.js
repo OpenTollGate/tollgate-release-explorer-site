@@ -239,21 +239,28 @@ export const filterReleases = (releases, filters) => {
 };
 
 /**
- * Deduplicate releases by version only, keeping the first release found for each version
+ * Deduplicate releases by version only, keeping the newest release for each version
  * This shows one release per version regardless of product type or architecture
  * @param {Array} releases - Array of release events
- * @returns {Array} Deduplicated releases
+ * @returns {Array} Deduplicated releases (sorted by created_at, newest first)
  */
 export const deduplicateReleases = (releases) => {
   if (!releases || !Array.isArray(releases)) return [];
   
+  // First, sort by created_at (newest first) to ensure we process newest releases first
+  const sortedReleases = [...releases].sort((a, b) => {
+    const aTime = a.created_at || 0;
+    const bTime = b.created_at || 0;
+    return bTime - aTime; // Newest first
+  });
+  
   const releaseMap = new Map();
   
-  releases.forEach(release => {
+  sortedReleases.forEach(release => {
     const version = getReleaseVersion(release);
     
-    // Only keep the first release for each version (by creation time)
-    if (!releaseMap.has(version) || release.created_at > releaseMap.get(version).created_at) {
+    // Only keep the first occurrence (which is the newest due to sorting)
+    if (!releaseMap.has(version)) {
       releaseMap.set(version, release);
     }
   });
@@ -370,9 +377,10 @@ export const getReleaseCountText = (releases) => {
 
 /**
  * Find all releases with the same version and product type but different architectures/devices
+ * Returns ALL matching releases without deduplication - let grouping functions handle that
  * @param {Array} releases - Array of all release events
  * @param {Object} currentRelease - The current release to find alternatives for
- * @returns {Array} Array of alternative releases
+ * @returns {Array} Array of alternative releases (not deduplicated)
  */
 export const findAlternativeReleases = (releases, currentRelease) => {
   if (!releases || !Array.isArray(releases) || !currentRelease) return [];
@@ -381,7 +389,9 @@ export const findAlternativeReleases = (releases, currentRelease) => {
   const currentProductType = getReleaseProductType(currentRelease);
   const currentArchitecture = getReleaseArchitecture(currentRelease);
   const currentDeviceId = getReleaseDeviceId(currentRelease);
+  const currentCompression = getReleaseCompression(currentRelease);
   
+  // Filter to matching version and product type (excluding current release)
   return releases.filter(release => {
     if (release.id === currentRelease.id) return false; // Exclude current release
     
@@ -393,16 +403,64 @@ export const findAlternativeReleases = (releases, currentRelease) => {
       return false;
     }
     
-    // For OS releases, show different device_ids
+    // For OS releases, show different device_ids OR same device with different compression
     if (productType === 'tollgate-os') {
       const deviceId = getReleaseDeviceId(release);
-      return deviceId !== currentDeviceId;
+      const compression = getReleaseCompression(release);
+      // Include if different device, OR same device but different compression
+      return deviceId !== currentDeviceId || compression !== currentCompression;
     }
     
-    // For packages (core, modules), show different architectures
+    // For packages, show different architectures OR same architecture with different compression
     const architecture = getReleaseArchitecture(release);
-    return architecture !== currentArchitecture;
+    const compression = getReleaseCompression(release);
+    return architecture !== currentArchitecture || compression !== currentCompression;
   });
+};
+
+/**
+ * Group releases by device, with compression variants for each device
+ * @param {Array} releases - Array of release events
+ * @returns {Array} Array of device groups with compression variants
+ */
+export const groupReleasesByDevice = (releases) => {
+  if (!releases || !Array.isArray(releases)) return [];
+  
+  const deviceMap = new Map();
+  
+  releases.forEach(release => {
+    const deviceId = getReleaseDeviceId(release);
+    const compression = getReleaseCompression(release);
+    
+    if (!deviceMap.has(deviceId)) {
+      deviceMap.set(deviceId, {
+        deviceId,
+        compressionVariants: new Map() // Use Map to deduplicate by compression type
+      });
+    }
+    
+    const deviceGroup = deviceMap.get(deviceId);
+    
+    // Only add if this compression type hasn't been added yet, or if it's newer
+    if (!deviceGroup.compressionVariants.has(compression) ||
+        release.created_at > deviceGroup.compressionVariants.get(compression).created_at) {
+      deviceGroup.compressionVariants.set(compression, release);
+    }
+  });
+  
+  // Convert Maps to arrays and sort compression variants
+  const result = Array.from(deviceMap.values()).map(group => ({
+    deviceId: group.deviceId,
+    compressionVariants: Array.from(group.compressionVariants.entries())
+      .map(([compression, release]) => ({ compression, release }))
+      .sort((a, b) => {
+        if (a.compression === 'none') return -1;
+        if (b.compression === 'none') return 1;
+        return a.compression.localeCompare(b.compression);
+      })
+  }));
+  
+  return result;
 };
 
 /**

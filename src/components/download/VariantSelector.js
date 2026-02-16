@@ -69,7 +69,7 @@ const VariantSelector = ({
   const filteredVariants = variants.filter((variant) => {
     if (!searchQuery) return true;
     const variantName = hasCompressionVariants
-      ? variant.architecture.toLowerCase()
+      ? (variant.architecture || variant.deviceId || '').toLowerCase()
       : getVariantName(variant).toLowerCase();
     return variantName.includes(searchQuery.toLowerCase());
   });
@@ -98,7 +98,9 @@ const VariantSelector = ({
         <VariantsList>
           {filteredVariants.map((variant) => {
             // Handle both grouped (with compression variants) and ungrouped variants
-            const variantId = hasCompressionVariants ? variant.architecture : variant.id;
+            const variantId = hasCompressionVariants
+              ? (variant.architecture || variant.deviceId)
+              : variant.id;
             const isExpanded = expandedVariant === variantId;
             
             // For compression variants, get the selected compression or default to 'none'
@@ -127,14 +129,16 @@ const VariantSelector = ({
             const fileHash = getReleaseFileHash(release);
             const dateTime = getReleaseDateWithTime(release);
             const channel = getReleaseChannel(release);
-            const variantName = hasCompressionVariants ? variant.architecture : getVariantName(variant);
+            const variantName = hasCompressionVariants
+              ? (variant.architecture || variant.deviceId)
+              : getVariantName(variant);
             const filename = downloadUrl
               ? downloadUrl.split("/").pop()
               : "file";
 
             return (
               <VariantOption
-                key={variantId}
+                key={variantId || variant.id || `variant-${Math.random()}`}
                 $isHighlighted={isExpanded}
                 $isExpanded={isExpanded}
                 onClick={() => {
@@ -190,7 +194,7 @@ const VariantSelector = ({
 
                 {isExpanded && (
                   <VariantExpandedContent>
-                    {hasCompressionVariants && variant.compressionVariants.length > 1 && (
+                    {hasCompressionVariants && variant.compressionVariants && variant.compressionVariants.length > 0 && (
                       <ExpandedSection>
                         <ExpandedTitle>Compression Type</ExpandedTitle>
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
