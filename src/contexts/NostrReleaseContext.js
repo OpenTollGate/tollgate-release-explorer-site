@@ -84,7 +84,7 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
           authors: [currentPubkey],
           limit: 5000
         };
-        
+
         // Add channel filter only if channelFilters is defined and has values
         if (channelFilters !== undefined && channelFilters.length > 0) {
           filter["#c"] = channelFilters;
@@ -93,6 +93,18 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
           filter["#c"] = ['stable'];
         }
         // If channelFilters is undefined, don't add channel filter at all
+
+        // Dev releases are a firehose (one per branch push). Relays like
+        // damus/nos.lol cap responses at ~500 events per filter, so a
+        // global fetch competes our dev builds out of the window. When
+        // the user has dev selected, limit 'since' to the last 14 days
+        // so only recent dev builds get returned. Stable/beta/alpha keep
+        // the full history.
+        const activeChannels = filter["#c"];
+        if (activeChannels && activeChannels.includes('dev')) {
+          const DEV_WINDOW_DAYS = 1;
+          filter.since = Math.floor(Date.now() / 1000) - DEV_WINDOW_DAYS * 86400;
+        }
         
         console.log("NostrReleaseProvider: Filter:", filter);
         

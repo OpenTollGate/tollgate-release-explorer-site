@@ -45,12 +45,17 @@ export const VIEW_MODES = {
   LIST: 'list'
 };
 
-// Default Nostr relays
+// Default Nostr relays.
+// These are the public relays our release pipeline publishes to and
+// that stay reachable from the browser. nostr.mom is important because
+// it carries the full history without the 500-event cap damus/nos.lol
+// impose. relay.tollgate.me is intentionally excluded — it returns
+// HTTP 525 (SSL handshake failure) from the browser today; add it back
+// once the cert is fixed.
 export const DEFAULT_RELAYS = [
   'wss://relay.damus.io',
-  'wss://relay.nostr.band',
   'wss://nos.lol',
-  'wss://relay.snort.social'
+  'wss://nostr.mom'
 ];
 
 // Filter defaults

@@ -20,13 +20,13 @@ const getMatchingTags = (release, tagName) => {
  * @returns {string} A formatted version string
  */
 export const getReleaseVersion = (release) => {
-  // Check for 'v' tag (new standard for both OS and packages)
-  const vTag = getTagValue(release, "v");
-  if (vTag) return vTag;
-  
-  
-  // Fallback to deprecated format tags
-  return 'Unknown'
+  // 'v' is the short single-letter tag (new standard); 'version' is
+  // the long-form alias older events may carry.
+  return (
+    getTagValue(release, "v") ||
+    getMatchingTags(release, "version")?.[0]?.[1] ||
+    "Unknown"
+  );
 };
 
 /**
@@ -69,11 +69,13 @@ export const getReleaseDateWithTime = (release) => {
  * @returns {string} The release channel
  */
 export const getReleaseChannel = (release) => {
-  // Check for 'c' tag (new standard)
-  const cTag = getMatchingTags(release, "c")?.[0]?.[1];
-  if (cTag) return cTag;
-  
-  return 'unknown';
+  // 'c' is the short single-letter tag; 'release_channel' is the
+  // long-form alias older events may carry.
+  return (
+    getMatchingTags(release, "c")?.[0]?.[1] ||
+    getMatchingTags(release, "release_channel")?.[0]?.[1] ||
+    "unknown"
+  );
 };
 
 /**
@@ -82,7 +84,13 @@ export const getReleaseChannel = (release) => {
  * @returns {string} The architecture or "Unknown"
  */
 export const getReleaseArchitecture = (release) => {
-  return getMatchingTags(release, "architecture")?.[0]?.[1] || "Unknown";
+  // 'A' is the short single-letter tag our pipeline emits;
+  // 'architecture' is the long-form alias older events carry.
+  return (
+    getMatchingTags(release, "A")?.[0]?.[1] ||
+    getMatchingTags(release, "architecture")?.[0]?.[1] ||
+    "Unknown"
+  );
 };
 
 /**
@@ -92,6 +100,27 @@ export const getReleaseArchitecture = (release) => {
  */
 export const getReleaseCompression = (release) => {
   return getMatchingTags(release, "compression")?.[0]?.[1] || "none";
+};
+
+/**
+ * Get the package format (ipk / apk) for a release. Checks the 'format'
+ * tag first; falls back to inferring from the filename/URL extension.
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string} 'ipk', 'apk', or 'unknown'
+ */
+export const getReleaseFormat = (release) => {
+  const tag = getMatchingTags(release, "format")?.[0]?.[1];
+  if (tag === "ipk" || tag === "apk") return tag;
+
+  const filename = getMatchingTags(release, "filename")?.[0]?.[1] || "";
+  if (filename.endsWith(".ipk")) return "ipk";
+  if (filename.endsWith(".apk")) return "apk";
+
+  const url = getMatchingTags(release, "url")?.[0]?.[1] || "";
+  if (url.endsWith(".ipk")) return "ipk";
+  if (url.endsWith(".apk")) return "apk";
+
+  return "unknown";
 };
 
 /**
@@ -155,19 +184,20 @@ export const getReleaseMimeType = (release) => {
  * @returns {string} Either 'tollgate-os', 'tollgate-wrt', or 'tollgate-module-basic-go'
  */
 export const getReleaseProductType = (release) => {
-  // Prefer new standardized 'name' tag
-  const name = getMatchingTags(release, "name")?.[0]?.[1];
-  if (name) {
+  // Check name tags in order of specificity. 'n' is the short-form tag
+  // our pipeline emits (NIP-94 single-letter alias). 'name' and
+  // 'package_name' are the older long-form equivalents some events
+  // still carry; keep reading them for backward compatibility.
+  const nameTags = [
+    getMatchingTags(release, "n")?.[0]?.[1],
+    getMatchingTags(release, "name")?.[0]?.[1],
+    getMatchingTags(release, "package_name")?.[0]?.[1],
+  ].filter(Boolean);
+
+  for (const name of nameTags) {
     if (name.includes('tollgate-os')) return 'tollgate-os';
     if (name.includes('tollgate-wrt')) return 'tollgate-wrt';
     if (name.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
-  }
-  
-  // Fallback to deprecated 'package_name' tag
-  const packageName = getMatchingTags(release, "package_name")?.[0]?.[1];
-  if (packageName) {
-    if (packageName.includes('tollgate-module-basic-go')) return 'tollgate-module-basic-go';
-    if (packageName.includes('tollgate-wrt')) return 'tollgate-wrt';
   }
   
   // Check if it has deprecated version tags
@@ -411,10 +441,17 @@ export const findAlternativeReleases = (releases, currentRelease) => {
       return deviceId !== currentDeviceId || compression !== currentCompression;
     }
     
-    // For packages, show different architectures OR same architecture with different compression
+    // For packages, show different architectures OR same architecture
+    // with different compression OR different format (ipk vs apk).
     const architecture = getReleaseArchitecture(release);
     const compression = getReleaseCompression(release);
-    return architecture !== currentArchitecture || compression !== currentCompression;
+    const format = getReleaseFormat(release);
+    const currentFormat = getReleaseFormat(currentRelease);
+    return (
+      architecture !== currentArchitecture ||
+      compression !== currentCompression ||
+      format !== currentFormat
+    );
   });
 };
 
@@ -476,35 +513,44 @@ export const groupReleasesByArchitecture = (releases) => {
   releases.forEach(release => {
     const architecture = getReleaseArchitecture(release);
     const compression = getReleaseCompression(release);
-    
+    const format = getReleaseFormat(release);
+    // Key compressionVariants by "<format>:<compression>" so ipk + apk
+    // with the same compression coexist instead of overwriting each other.
+    const key = `${format}:${compression}`;
+
     if (!architectureMap.has(architecture)) {
       architectureMap.set(architecture, {
         architecture,
-        compressionVariants: new Map() // Use Map to deduplicate by compression type
+        compressionVariants: new Map()
       });
     }
-    
+
     const archGroup = architectureMap.get(architecture);
-    
-    // Only add if this compression type hasn't been added yet, or if it's newer
-    if (!archGroup.compressionVariants.has(compression) ||
-        release.created_at > archGroup.compressionVariants.get(compression).created_at) {
-      archGroup.compressionVariants.set(compression, release);
+
+    if (!archGroup.compressionVariants.has(key) ||
+        release.created_at > archGroup.compressionVariants.get(key).created_at) {
+      archGroup.compressionVariants.set(key, release);
     }
   });
-  
-  // Convert Maps to arrays and sort compression variants
+
+  // Convert Maps to arrays and sort variants (none first, then alpha).
   const result = Array.from(architectureMap.values()).map(group => ({
     architecture: group.architecture,
-    compressionVariants: Array.from(group.compressionVariants.entries())
-      .map(([compression, release]) => ({ compression, release }))
+    compressionVariants: Array.from(group.compressionVariants.values())
+      .map(release => ({
+        compression: getReleaseCompression(release),
+        format: getReleaseFormat(release),
+        release
+      }))
       .sort((a, b) => {
-        if (a.compression === 'none') return -1;
-        if (b.compression === 'none') return 1;
-        return a.compression.localeCompare(b.compression);
+        if (a.compression === 'none' && b.compression !== 'none') return -1;
+        if (b.compression === 'none' && a.compression !== 'none') return 1;
+        const byComp = a.compression.localeCompare(b.compression);
+        if (byComp !== 0) return byComp;
+        return a.format.localeCompare(b.format);
       })
   }));
-  
+
   return result;
 };
 
