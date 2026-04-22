@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { getChannelColor } from "../../styles/theme";
 import {
   getReleaseDownloadUrl,
   getReleaseFileHash,
   getReleaseDateWithTime,
-  getReleaseChannel,
 } from "../../utils/releaseUtils";
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
@@ -25,17 +23,16 @@ import {
   DownloadButton,
   ExpandIcon,
   VariantExpandedContent,
-  ExpandedSection,
-  ExpandedTitle,
-  ExpandedItem,
-  ExpandedLabel,
+  ExpandedRow,
+  ExpandedRowLabel,
+  ExpandedChipGroup,
   ExpandedValue,
   CopyIcon,
-  VerifyInstructions,
   CommandCode,
+  ExpandedFooter,
+  RawEventToggle,
   RawEventSection,
   RawEventText,
-  ChannelBadge,
 } from "./DownloadPage.styles";
 
 /**
@@ -59,6 +56,8 @@ const VariantSelector = ({
   singularLabel,
   pluralLabel,
   hasCompressionVariants = false,
+  onSelect = null,
+  selectedReleaseId = null,
 }) => {
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [expandedVariant, setExpandedVariant] = useState(null);
@@ -128,7 +127,6 @@ const VariantSelector = ({
             const downloadUrl = getReleaseDownloadUrl(release);
             const fileHash = getReleaseFileHash(release);
             const dateTime = getReleaseDateWithTime(release);
-            const channel = getReleaseChannel(release);
             const variantName = hasCompressionVariants
               ? (variant.architecture || variant.deviceId)
               : getVariantName(variant);
@@ -164,17 +162,26 @@ const VariantSelector = ({
                         <VariantDetailLabel>Released:</VariantDetailLabel>
                         <VariantDetailValue>{dateTime}</VariantDetailValue>
                       </VariantDetailItem>
-                      <VariantDetailItem>
-                        <ChannelBadge
-                          $color={getChannelColor(channel)}
-                          $small
-                        >
-                          {channel}
-                        </ChannelBadge>
-                      </VariantDetailItem>
                     </VariantDetails>
                   </VariantInfo>
                   <VariantActions>
+                    {onSelect && (
+                      <Button
+                        variant={selectedReleaseId === release.id ? "primary" : "outline"}
+                        size="sm"
+                        title={selectedReleaseId === release.id
+                          ? "Currently filling the install commands above"
+                          : "Fill in the install commands above with this variant"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(release);
+                        }}
+                      >
+                        {selectedReleaseId === release.id
+                          ? "✓ In install ↑"
+                          : "Fill install ↑"}
+                      </Button>
+                    )}
                     <DownloadButton
                       variant={isExpanded ? "primary" : "outline"}
                       size="sm"
@@ -195,9 +202,9 @@ const VariantSelector = ({
                 {isExpanded && (
                   <VariantExpandedContent>
                     {hasCompressionVariants && variant.compressionVariants && variant.compressionVariants.length > 0 && (
-                      <ExpandedSection>
-                        <ExpandedTitle>Compression Type</ExpandedTitle>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                      <ExpandedRow>
+                        <ExpandedRowLabel>Compression</ExpandedRowLabel>
+                        <ExpandedChipGroup>
                           {variant.compressionVariants.map(({ compression }) => (
                             <Button
                               key={compression}
@@ -214,94 +221,69 @@ const VariantSelector = ({
                               {compression}
                             </Button>
                           ))}
-                        </div>
-                      </ExpandedSection>
-                    )}
-                    
-                    {(downloadUrl || fileHash) && (
-                      <ExpandedSection>
-                        <ExpandedTitle>Download & Verification</ExpandedTitle>
-
-                        {downloadUrl && (
-                          <ExpandedItem>
-                            <ExpandedLabel>Download URL (Blossom)</ExpandedLabel>
-                            <ExpandedValue
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyToClipboard(downloadUrl);
-                              }}
-                            >
-                              {downloadUrl}
-                              <CopyIcon>📋</CopyIcon>
-                            </ExpandedValue>
-                          </ExpandedItem>
-                        )}
-
-                        {fileHash && (
-                          <>
-                            <ExpandedItem>
-                              <ExpandedLabel>SHA-256 Hash</ExpandedLabel>
-                              <ExpandedValue
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyToClipboard(fileHash);
-                                }}
-                              >
-                                {fileHash}
-                                <CopyIcon>📋</CopyIcon>
-                              </ExpandedValue>
-                            </ExpandedItem>
-
-                            <VerifyInstructions>
-                              Verify file integrity after downloading:
-                            </VerifyInstructions>
-                            <CommandCode
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyToClipboard(`shasum -a 256 ${filename}`);
-                              }}
-                            >
-                              shasum -a 256 {filename}
-                              <CopyIcon>📋</CopyIcon>
-                            </CommandCode>
-                          </>
-                        )}
-                      </ExpandedSection>
+                        </ExpandedChipGroup>
+                      </ExpandedRow>
                     )}
 
-                    <ExpandedSection>
-                      <ExpandedTitle>Developer Info</ExpandedTitle>
-                      <Button
-                        variant="outline"
-                        size="sm"
+                    {downloadUrl && (
+                      <ExpandedRow>
+                        <ExpandedRowLabel>URL</ExpandedRowLabel>
+                        <ExpandedValue
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(downloadUrl);
+                          }}
+                        >
+                          {downloadUrl}
+                          <CopyIcon>📋</CopyIcon>
+                        </ExpandedValue>
+                      </ExpandedRow>
+                    )}
+
+                    {fileHash && (
+                      <ExpandedRow>
+                        <ExpandedRowLabel>Verify</ExpandedRowLabel>
+                        <CommandCode
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(`shasum -a 256 ${filename}`);
+                          }}
+                        >
+                          shasum -a 256 {filename}
+                          <CopyIcon>📋</CopyIcon>
+                        </CommandCode>
+                      </ExpandedRow>
+                    )}
+
+                    <ExpandedFooter>
+                      <RawEventToggle
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowRawEvent(!showRawEvent);
                         }}
                       >
-                        {showRawEvent ? "Hide" : "Show"} Raw Event
-                      </Button>
-
-                      {showRawEvent && (
-                        <RawEventSection onClick={(e) => e.stopPropagation()}>
-                          <RawEventText>
-                            {JSON.stringify(
-                              {
-                                id: release.id,
-                                pubkey: release.pubkey,
-                                created_at: release.created_at,
-                                kind: release.kind,
-                                tags: release.tags,
-                                content: release.content,
-                                sig: release.sig,
-                              },
-                              null,
-                              2
-                            )}
-                          </RawEventText>
-                        </RawEventSection>
-                      )}
-                    </ExpandedSection>
+                        {showRawEvent ? "Hide" : "Show"} raw event
+                      </RawEventToggle>
+                    </ExpandedFooter>
+                    {showRawEvent && (
+                      <RawEventSection onClick={(e) => e.stopPropagation()}>
+                        <RawEventText>
+                          {JSON.stringify(
+                            {
+                              id: release.id,
+                              pubkey: release.pubkey,
+                              created_at: release.created_at,
+                              kind: release.kind,
+                              tags: release.tags,
+                              content: release.content,
+                              sig: release.sig,
+                            },
+                            null,
+                            2
+                          )}
+                        </RawEventText>
+                      </RawEventSection>
+                    )}
                   </VariantExpandedContent>
                 )}
               </VariantOption>

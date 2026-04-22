@@ -246,40 +246,45 @@ export const ExpandIcon = styled.span`
 
 // Expanded Content
 export const VariantExpandedContent = styled.div`
-  margin-top: ${(props) => props.theme.spacing.md};
-  padding-top: ${(props) => props.theme.spacing.md};
+  margin-top: ${(props) => props.theme.spacing.sm};
+  padding-top: ${(props) => props.theme.spacing.sm};
   border-top: 1px solid ${(props) => props.theme.colors.border};
-`;
-
-export const ExpandedSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${(props) => props.theme.spacing.md};
-`;
-
-export const ExpandedTitle = styled.h4`
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  font-weight: ${(props) => props.theme.fontWeights.semibold};
-  color: ${(props) => props.theme.colors.text};
-  margin: 0 0 ${(props) => props.theme.spacing.sm} 0;
-`;
-
-export const ExpandedItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${(props) => props.theme.spacing.xs};
 `;
 
-export const ExpandedLabel = styled.div`
+// Row layout: small label on the left, value/action on the right. Collapses
+// to a stacked block on narrow screens. Keeps the expanded panel scannable
+// without the prior section-heading overhead.
+export const ExpandedRow = styled.div`
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.sm};
+
+  @media (max-width: ${(props) => props.theme.breakpoints.sm}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ExpandedRowLabel = styled.div`
   font-size: ${(props) => props.theme.fontSizes.xs};
   color: ${(props) => props.theme.colors.textMuted};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+`;
+
+export const ExpandedChipGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${(props) => props.theme.spacing.xs};
 `;
 
 export const ExpandedValue = styled.div`
   background-color: ${(props) => props.theme.colors.background};
-  padding: ${(props) => props.theme.spacing.sm};
+  padding: ${(props) => props.theme.spacing.xs}
+    ${(props) => props.theme.spacing.sm};
   border-radius: ${(props) => props.theme.radii.sm};
   font-family: monospace;
   font-size: ${(props) => props.theme.fontSizes.xs};
@@ -289,6 +294,7 @@ export const ExpandedValue = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 
   &:hover {
     background-color: ${(props) => props.theme.colors.cardBackgroundHover};
@@ -300,15 +306,10 @@ export const CopyIcon = styled.span`
   opacity: 0.6;
 `;
 
-export const VerifyInstructions = styled.p`
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  color: ${(props) => props.theme.colors.textSecondary};
-  margin: ${(props) => props.theme.spacing.md} 0;
-`;
-
 export const CommandCode = styled.div`
   background-color: ${(props) => props.theme.colors.background};
-  padding: ${(props) => props.theme.spacing.sm};
+  padding: ${(props) => props.theme.spacing.xs}
+    ${(props) => props.theme.spacing.sm};
   border-radius: ${(props) => props.theme.radii.sm};
   font-family: monospace;
   font-size: ${(props) => props.theme.fontSizes.xs};
@@ -317,9 +318,31 @@ export const CommandCode = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 
   &:hover {
     background-color: ${(props) => props.theme.colors.cardBackgroundHover};
+  }
+`;
+
+export const ExpandedFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: ${(props) => props.theme.spacing.xs};
+`;
+
+export const RawEventToggle = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.textMuted};
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: ${(props) => props.theme.colors.textSecondary};
   }
 `;
 
