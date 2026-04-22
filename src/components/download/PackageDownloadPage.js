@@ -18,6 +18,7 @@ import {
 import Button from "../common/Button";
 import { CardHeader, CardContent } from "../common/Card";
 import VariantSelector from "./VariantSelector";
+import InstallationPanel from "./InstallationPanel";
 import {
   PageContainer,
   Header,
@@ -151,26 +152,12 @@ const PackageDownloadPage = () => {
             <h3>Installation Instructions</h3>
           </CardHeader>
           <CardContent>
-            {selectedArchLabel ? (
-              <InstallHint>
-                Commands below target <strong>{selectedArchLabel}</strong>
-                {" "}
-                <InlineLink onClick={() => setSelectedRelease(null)}>
-                  clear selection
-                </InlineLink>
-              </InstallHint>
-            ) : (
-              <InstallHint>
-                Showing a placeholder filename. Expand an architecture below
-                and choose <em>Use in install commands above</em> to fill in
-                the real URL and hash.
-              </InstallHint>
-            )}
-            <InstallPickOne>Pick one of the two methods below:</InstallPickOne>
-            <InstallationInstructions
-              format={activeFormat}
+            <InstallationPanel
+              kind={activeFormat === "apk" ? "apk" : "ipk"}
               filename={selectedFilename}
               downloadUrl={selectedUrl}
+              selectedLabel={selectedArchLabel}
+              onClearSelection={() => setSelectedRelease(null)}
             />
           </CardContent>
         </InstallationCard>
@@ -224,54 +211,6 @@ const PackageDownloadPage = () => {
         />
       </MainContent>
     </PageContainer>
-  );
-};
-
-// --- Format-specific install instructions -----------------------------------
-
-const InstallationInstructions = ({ format, filename, downloadUrl }) => {
-  const isApk = format === "apk";
-  const installCmd = isApk
-    ? `apk add --allow-untrusted /tmp/${filename}`
-    : `opkg install /tmp/${filename}`;
-  const installComment = isApk
-    ? "# --allow-untrusted: our packages aren't signed yet"
-    : null;
-  const srcUrl = downloadUrl || `<url>`;
-
-  return (
-    <InstallBlocks>
-      <InstallBlock>
-        <InstallBlockTitle>Option A · On the router</InstallBlockTitle>
-        <Terminal>
-          <TerminalLine>cd /tmp && wget {srcUrl}</TerminalLine>
-          <TerminalLine>{installCmd}</TerminalLine>
-          {installComment && (
-            <TerminalComment>{installComment}</TerminalComment>
-          )}
-        </Terminal>
-      </InstallBlock>
-
-      <InstallOrDivider>
-        <span>or</span>
-      </InstallOrDivider>
-
-      <InstallBlock>
-        <InstallBlockTitle>Option B · From your computer</InstallBlockTitle>
-        <Terminal>
-          <TerminalLine>curl -L -o {filename} {srcUrl}</TerminalLine>
-          <TerminalLine>scp -O {filename} root@192.168.1.1:/tmp/</TerminalLine>
-          <TerminalLine>ssh root@192.168.1.1 '{installCmd}'</TerminalLine>
-          {installComment && (
-            <TerminalComment>{installComment}</TerminalComment>
-          )}
-        </Terminal>
-        <InstallNote>
-          <Code>-O</Code> is required on macOS/modern OpenSSH — OpenWrt has
-          no <Code>sftp-server</Code>.
-        </InstallNote>
-      </InstallBlock>
-    </InstallBlocks>
   );
 };
 
@@ -346,124 +285,6 @@ const FormatSub = styled.span`
 const FormatCount = styled.span`
   font-size: ${(props) => props.theme.fontSizes.xs};
   opacity: 0.8;
-`;
-
-const InstallHint = styled.p`
-  margin: 0 0 ${(props) => props.theme.spacing.md} 0;
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  color: ${(props) => props.theme.colors.textSecondary};
-  line-height: 1.5;
-`;
-
-const InlineLink = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: ${(props) => props.theme.colors.primary};
-  cursor: pointer;
-  text-decoration: underline;
-`;
-
-const InstallPickOne = styled.div`
-  margin: 0 0 ${(props) => props.theme.spacing.md} 0;
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  font-weight: ${(props) => props.theme.fontWeights.medium};
-  color: ${(props) => props.theme.colors.text};
-`;
-
-const InstallBlocks = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${(props) => props.theme.spacing.md};
-`;
-
-const InstallOrDivider = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${(props) => props.theme.spacing.sm};
-  font-size: ${(props) => props.theme.fontSizes.xs};
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: ${(props) => props.theme.colors.textSecondary};
-
-  span {
-    flex: 0 0 auto;
-    padding: 0 ${(props) => props.theme.spacing.sm};
-  }
-
-  &::before,
-  &::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background-color: ${(props) => props.theme.colors.border};
-  }
-`;
-
-const InstallBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${(props) => props.theme.spacing.sm};
-  min-width: 0;
-`;
-
-const InstallBlockTitle = styled.h4`
-  margin: 0;
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  font-weight: ${(props) => props.theme.fontWeights.medium};
-  color: ${(props) => props.theme.colors.textSecondary};
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-`;
-
-const Terminal = styled.div`
-  font-family: monospace;
-  font-size: ${(props) => props.theme.fontSizes.sm};
-  background-color: ${(props) => props.theme.colors.background};
-  border: 1px solid ${(props) => props.theme.colors.border};
-  border-radius: ${(props) => props.theme.radii.md};
-  padding: ${(props) => props.theme.spacing.md};
-  display: flex;
-  flex-direction: column;
-  gap: ${(props) => props.theme.spacing.xs};
-  overflow-x: auto;
-`;
-
-const TerminalLine = styled.div`
-  color: ${(props) => props.theme.colors.text};
-  white-space: pre;
-  word-break: keep-all;
-
-  &::before {
-    content: "$ ";
-    color: ${(props) => props.theme.colors.textSecondary};
-    user-select: none;
-  }
-`;
-
-const TerminalComment = styled.div`
-  color: ${(props) => props.theme.colors.textSecondary};
-  white-space: pre;
-  word-break: keep-all;
-  opacity: 0.8;
-`;
-
-const InstallNote = styled.p`
-  margin: 0;
-  font-size: ${(props) => props.theme.fontSizes.xs};
-  color: ${(props) => props.theme.colors.textSecondary};
-  line-height: 1.5;
-`;
-
-const Code = styled.code`
-  display: inline-block;
-  padding: 1px 5px;
-  font-family: monospace;
-  font-size: ${(props) => props.theme.fontSizes.xs};
-  background-color: ${(props) => props.theme.colors.background};
-  border: 1px solid ${(props) => props.theme.colors.border};
-  border-radius: ${(props) => props.theme.radii.sm};
 `;
 
 export default PackageDownloadPage;

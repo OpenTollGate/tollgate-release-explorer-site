@@ -138,7 +138,14 @@ export const getReleaseOpenWrtVersion = (release) => {
  * @returns {string} The device ID or "Unknown"
  */
 export const getReleaseDeviceId = (release) => {
-  return getMatchingTags(release, "device_id")?.[0]?.[1] || "Unknown";
+  // 'd' is the short single-letter tag OS events emit alongside the
+  // legacy 'device_id' long form; read short first for consistency
+  // with the other helpers and to survive a future long-form cleanup.
+  return (
+    getMatchingTags(release, "d")?.[0]?.[1] ||
+    getMatchingTags(release, "device_id")?.[0]?.[1] ||
+    "Unknown"
+  );
 };
 
 /**
