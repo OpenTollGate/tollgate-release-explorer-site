@@ -16,12 +16,16 @@ import {
 const ReleaseList = ({ releases }) => {
   const navigate = useNavigate();
 
+  // Channel must travel with the route so the detail page re-subscribes
+  // to the right relay filter — without it the provider falls back to
+  // 'stable' and dev/beta releases render as "Release Not Found".
   const getDetailRoute = (release) => {
     const productType = getReleaseProductType(release);
-    if (productType === PRODUCT_TYPES.TOLLGATE_OS) {
-      return `/os/${release.id}`;
-    }
-    return `/package/${release.id}`;
+    const channel = getReleaseChannel(release);
+    const baseRoute = productType === PRODUCT_TYPES.TOLLGATE_OS
+      ? `/os/${release.id}`
+      : `/package/${release.id}`;
+    return `${baseRoute}?channel=${channel}`;
   };
 
   const handleRowClick = (release) => {
