@@ -463,48 +463,96 @@ export const findAlternativeReleases = (releases, currentRelease) => {
 };
 
 /**
- * Group releases by device, with compression variants for each device
+ * Group releases by (device, OpenWrt version), with compression variants per group.
+ * One card per device-version pair so users can see and pick a specific OS
+ * version without a separate top-level filter.
  * @param {Array} releases - Array of release events
- * @returns {Array} Array of device groups with compression variants
+ * @returns {Array} Array of {deviceId, openwrtVersion, displayName, compressionVariants}
  */
 export const groupReleasesByDevice = (releases) => {
   if (!releases || !Array.isArray(releases)) return [];
-  
-  const deviceMap = new Map();
-  
+
+  const groupMap = new Map();
+
   releases.forEach(release => {
     const deviceId = getReleaseDeviceId(release);
+    const openwrtVersion = getReleaseOpenWrtVersion(release);
     const compression = getReleaseCompression(release);
-    
-    if (!deviceMap.has(deviceId)) {
-      deviceMap.set(deviceId, {
+    const key = `${deviceId}::${openwrtVersion}`;
+
+    if (!groupMap.has(key)) {
+      groupMap.set(key, {
         deviceId,
-        compressionVariants: new Map() // Use Map to deduplicate by compression type
+        openwrtVersion,
+        displayName: openwrtVersion && openwrtVersion !== 'Unknown'
+          ? `${deviceId} (OpenWrt ${openwrtVersion})`
+          : deviceId,
+        compressionVariants: new Map()
       });
     }
-    
-    const deviceGroup = deviceMap.get(deviceId);
-    
-    // Only add if this compression type hasn't been added yet, or if it's newer
-    if (!deviceGroup.compressionVariants.has(compression) ||
-        release.created_at > deviceGroup.compressionVariants.get(compression).created_at) {
-      deviceGroup.compressionVariants.set(compression, release);
+
+    const group = groupMap.get(key);
+
+    if (!group.compressionVariants.has(compression) ||
+        release.created_at > group.compressionVariants.get(compression).created_at) {
+      group.compressionVariants.set(compression, release);
     }
   });
-  
-  // Convert Maps to arrays and sort compression variants
-  const result = Array.from(deviceMap.values()).map(group => ({
-    deviceId: group.deviceId,
-    compressionVariants: Array.from(group.compressionVariants.entries())
-      .map(([compression, release]) => ({ compression, release }))
-      .sort((a, b) => {
-        if (a.compression === 'none') return -1;
-        if (b.compression === 'none') return 1;
-        return a.compression.localeCompare(b.compression);
-      })
-  }));
-  
-  return result;
+
+  // Compare OpenWrt versions numerically by segment so 25.12.2 > 24.10.4.
+  const compareVersionDesc = (a, b) => {
+    const parse = (s) => (s || '').split(/[^0-9]+/).map((x) => parseInt(x, 10) || 0);
+    const sa = parse(a);
+    const sb = parse(b);
+    for (let i = 0; i < Math.max(sa.length, sb.length); i += 1) {
+      const da = sa[i] || 0;
+      const db = sb[i] || 0;
+      if (da !== db) return db - da;
+    }
+    return 0;
+  };
+
+  // For each device, find the highest known OpenWrt version — that's the
+  // one we mark as "recommended" when the device has multiple versions.
+  const newestVersionByDevice = new Map();
+  for (const group of groupMap.values()) {
+    const v = group.openwrtVersion;
+    if (!v || v === 'Unknown') continue;
+    const current = newestVersionByDevice.get(group.deviceId);
+    if (!current || compareVersionDesc(v, current) < 0) {
+      newestVersionByDevice.set(group.deviceId, v);
+    }
+  }
+  const versionCountByDevice = new Map();
+  for (const group of groupMap.values()) {
+    versionCountByDevice.set(
+      group.deviceId,
+      (versionCountByDevice.get(group.deviceId) || 0) + 1
+    );
+  }
+
+  return Array.from(groupMap.values())
+    .map(group => ({
+      deviceId: group.deviceId,
+      openwrtVersion: group.openwrtVersion,
+      displayName: group.displayName,
+      isRecommended:
+        (versionCountByDevice.get(group.deviceId) || 0) > 1 &&
+        newestVersionByDevice.get(group.deviceId) === group.openwrtVersion,
+      compressionVariants: Array.from(group.compressionVariants.entries())
+        .map(([compression, release]) => ({ compression, release }))
+        .sort((a, b) => {
+          if (a.compression === 'none') return -1;
+          if (b.compression === 'none') return 1;
+          return a.compression.localeCompare(b.compression);
+        })
+    }))
+    // Same device's versions cluster together, newer OpenWrt first.
+    .sort((a, b) => {
+      const byDevice = a.deviceId.localeCompare(b.deviceId);
+      if (byDevice !== 0) return byDevice;
+      return compareVersionDesc(a.openwrtVersion, b.openwrtVersion);
+    });
 };
 
 /**

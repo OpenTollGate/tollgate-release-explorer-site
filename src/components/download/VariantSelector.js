@@ -15,6 +15,8 @@ import {
   VariantOptionHeader,
   VariantInfo,
   VariantName,
+  VariantNameSubtle,
+  RecommendedBadge,
   VariantDetails,
   VariantDetailItem,
   VariantDetailLabel,
@@ -68,7 +70,7 @@ const VariantSelector = ({
   const filteredVariants = variants.filter((variant) => {
     if (!searchQuery) return true;
     const variantName = hasCompressionVariants
-      ? (variant.architecture || variant.deviceId || '').toLowerCase()
+      ? (variant.displayName || variant.architecture || variant.deviceId || '').toLowerCase()
       : getVariantName(variant).toLowerCase();
     return variantName.includes(searchQuery.toLowerCase());
   });
@@ -96,9 +98,11 @@ const VariantSelector = ({
 
         <VariantsList>
           {filteredVariants.map((variant) => {
-            // Handle both grouped (with compression variants) and ungrouped variants
+            // Handle both grouped (with compression variants) and ungrouped variants.
+            // For device groups, deviceId alone isn't unique once we split per
+            // OpenWrt version, so prefer displayName as the per-row key.
             const variantId = hasCompressionVariants
-              ? (variant.architecture || variant.deviceId)
+              ? (variant.displayName || variant.architecture || variant.deviceId)
               : variant.id;
             const isExpanded = expandedVariant === variantId;
             
@@ -128,7 +132,19 @@ const VariantSelector = ({
             const fileHash = getReleaseFileHash(release);
             const dateTime = getReleaseDateWithTime(release);
             const variantName = hasCompressionVariants
-              ? (variant.architecture || variant.deviceId)
+              ? (
+                  <>
+                    {variant.deviceId || variant.architecture}
+                    {variant.openwrtVersion && variant.openwrtVersion !== 'Unknown' && (
+                      <VariantNameSubtle> · OpenWrt {variant.openwrtVersion}</VariantNameSubtle>
+                    )}
+                    {variant.isRecommended && (
+                      <RecommendedBadge title="Newest OpenWrt version available for this device">
+                        recommended
+                      </RecommendedBadge>
+                    )}
+                  </>
+                )
               : getVariantName(variant);
             const filename = downloadUrl
               ? downloadUrl.split("/").pop()

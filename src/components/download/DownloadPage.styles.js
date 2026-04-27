@@ -208,6 +208,28 @@ export const VariantName = styled.div`
   margin-bottom: ${(props) => props.theme.spacing.xs};
 `;
 
+export const VariantNameSubtle = styled.span`
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  font-weight: ${(props) => props.theme.fontWeights.normal};
+  color: ${(props) => props.theme.colors.textSecondary};
+`;
+
+export const RecommendedBadge = styled.span`
+  display: inline-block;
+  margin-left: ${(props) => props.theme.spacing.sm};
+  padding: 1px ${(props) => props.theme.spacing.sm};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: ${(props) => props.theme.fontWeights.normal};
+  color: ${(props) => props.theme.colors.textSecondary};
+  background-color: ${(props) => props.theme.colors.backgroundSecondary};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: ${(props) => props.theme.radii.full};
+  text-transform: lowercase;
+  letter-spacing: 0.2px;
+  cursor: help;
+  vertical-align: middle;
+`;
+
 export const VariantDetails = styled.div`
   display: flex;
   gap: ${(props) => props.theme.spacing.md};
