@@ -167,6 +167,31 @@ export const getReleaseDownloadUrl = (release) => {
 };
 
 /**
+ * Get the filename for a release, with the correct file extension.
+ * Blossom-hosted files use the SHA-256 hash as the URL path segment with no
+ * extension; this helper appends the right one so install commands work.
+ * Priority: explicit `filename` tag → URL basename (if it has a dot) →
+ * URL basename + format/mime-derived extension.
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string|null} Filename with extension, or null if no URL is available
+ */
+export const getReleaseFilename = (release) => {
+  const filenameTag = getMatchingTags(release, "filename")?.[0]?.[1];
+  if (filenameTag) return filenameTag;
+
+  const url = getReleaseDownloadUrl(release);
+  if (!url) return null;
+
+  const basename = url.split("/").pop();
+  if (basename.includes(".")) return basename;
+
+  const format = getReleaseFormat(release);
+  if (format === "ipk" || format === "apk") return `${basename}.${format}`;
+
+  return `${basename}.bin`;
+};
+
+/**
  * Get the file hash for verification
  * @param {Object} release - The Nostr event containing release information
  * @returns {string} The file hash or null

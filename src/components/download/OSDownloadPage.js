@@ -10,6 +10,7 @@ import {
   getReleaseProductType,
   getProductDisplayName,
   getReleaseDownloadUrl,
+  getReleaseFilename,
   findAlternativeReleases,
   groupReleasesByDevice,
 } from "../../utils/releaseUtils";
@@ -78,8 +79,8 @@ const OSDownloadPage = () => {
   const selectedUrl = selectedRelease
     ? getReleaseDownloadUrl(selectedRelease)
     : null;
-  const selectedFilename = selectedUrl
-    ? selectedUrl.split("/").pop()
+  const selectedFilename = selectedRelease
+    ? (getReleaseFilename(selectedRelease) ?? "[sha256-hash].bin")
     : "[sha256-hash].bin";
   const selectedDeviceLabel = selectedRelease
     ? getReleaseDeviceId(selectedRelease)
