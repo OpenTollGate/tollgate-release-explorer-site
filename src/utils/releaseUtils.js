@@ -169,16 +169,12 @@ export const getReleaseDownloadUrl = (release) => {
 /**
  * Get the filename for a release, with the correct file extension.
  * Blossom-hosted files use the SHA-256 hash as the URL path segment with no
- * extension; this helper appends the right one so install commands work.
- * Priority: explicit `filename` tag → URL basename (if it has a dot) →
- * URL basename + format/mime-derived extension.
+ * extension; this helper keeps that hash-as-filename convention and just
+ * appends the format/firmware extension so wget/opkg find the file by name.
  * @param {Object} release - The Nostr event containing release information
  * @returns {string|null} Filename with extension, or null if no URL is available
  */
 export const getReleaseFilename = (release) => {
-  const filenameTag = getMatchingTags(release, "filename")?.[0]?.[1];
-  if (filenameTag) return filenameTag;
-
   const url = getReleaseDownloadUrl(release);
   if (!url) return null;
 

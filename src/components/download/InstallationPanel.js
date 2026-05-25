@@ -58,7 +58,7 @@ const InstallationPanel = ({
         <InstallBlock>
           <InstallBlockTitle>Option A · On the router</InstallBlockTitle>
           <Terminal>
-            <TerminalLine>cd /tmp && wget {srcUrl}</TerminalLine>
+            <TerminalLine>cd /tmp && wget -O {filename} {srcUrl}</TerminalLine>
             <TerminalLine>{spec.installCmd(filename)}</TerminalLine>
             {spec.trailingComment && (
               <TerminalComment>{spec.trailingComment}</TerminalComment>
