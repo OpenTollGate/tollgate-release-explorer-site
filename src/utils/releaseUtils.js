@@ -167,6 +167,27 @@ export const getReleaseDownloadUrl = (release) => {
 };
 
 /**
+ * Get the filename for a release, with the correct file extension.
+ * Blossom-hosted files use the SHA-256 hash as the URL path segment with no
+ * extension; this helper keeps that hash-as-filename convention and just
+ * appends the format/firmware extension so wget/opkg find the file by name.
+ * @param {Object} release - The Nostr event containing release information
+ * @returns {string|null} Filename with extension, or null if no URL is available
+ */
+export const getReleaseFilename = (release) => {
+  const url = getReleaseDownloadUrl(release);
+  if (!url) return null;
+
+  const basename = url.split("/").pop();
+  if (basename.includes(".")) return basename;
+
+  const format = getReleaseFormat(release);
+  if (format === "ipk" || format === "apk") return `${basename}.${format}`;
+
+  return `${basename}.bin`;
+};
+
+/**
  * Get the file hash for verification
  * @param {Object} release - The Nostr event containing release information
  * @returns {string} The file hash or null

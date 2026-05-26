@@ -11,6 +11,7 @@ import {
   getReleaseProductType,
   getProductDisplayName,
   getReleaseDownloadUrl,
+  getReleaseFilename,
   getReleaseFormat,
   findAlternativeReleases,
   groupReleasesByArchitecture,
@@ -118,8 +119,8 @@ const PackageDownloadPage = () => {
   const selectedUrl = selectedRelease
     ? getReleaseDownloadUrl(selectedRelease)
     : null;
-  const selectedFilename = selectedUrl
-    ? selectedUrl.split("/").pop()
+  const selectedFilename = selectedRelease
+    ? (getReleaseFilename(selectedRelease) ?? placeholderFilename)
     : placeholderFilename;
   const selectedArchLabel = selectedRelease
     ? getReleaseArchitecture(selectedRelease)
