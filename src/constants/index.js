@@ -49,13 +49,17 @@ export const VIEW_MODES = {
 // These are the public relays our release pipeline publishes to and
 // that stay reachable from the browser. nostr.mom is important because
 // it carries the full history without the 500-event cap damus/nos.lol
-// impose. relay.tollgate.me is intentionally excluded — it returns
-// HTTP 525 (SSL handshake failure) from the browser today; add it back
-// once the cert is fixed.
+// impose. relay1/relay2.orangesync.tech and relay.tollgate.me were added
+// to the publish pipeline for redundancy and also carry the full release
+// history. (relay.tollgate.me previously returned HTTP 525 from the
+// browser; its cert is fixed now.)
 export const DEFAULT_RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol',
-  'wss://nostr.mom'
+  'wss://nostr.mom',
+  'wss://relay.tollgate.me',
+  'wss://relay1.orangesync.tech',
+  'wss://relay2.orangesync.tech'
 ];
 
 // Filter defaults
