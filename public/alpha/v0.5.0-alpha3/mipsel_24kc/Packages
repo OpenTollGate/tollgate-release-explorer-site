@@ -1,0 +1,13 @@
+Package: tollgate-wrt
+Version: v0.5.0-alpha3
+Depends: nodogsplash, luci, jq
+Provides: nodogsplash-files
+Replaces: nodogsplash, base-files
+Architecture: mipsel_24kc
+Maintainer: TollGate <tollgate@tollgate.me>
+License: CC0-1.0
+Description: TollGate Basic Module for OpenWrt
+Filename: tollgate-wrt_v0.5.0-alpha3_mipsel_24kc-upx-ultra-brute.ipk
+Size: 5276305
+SHA256sum: 1f5e2dd84a5b88965df249ce9bf320241fb41d14f36399ebc82165fb67d6fdda
+

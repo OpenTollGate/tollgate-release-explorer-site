@@ -1,0 +1,39 @@
+Package: tollgate-wrt
+Version: v0.5.0-alpha3
+Depends: nodogsplash, luci, jq
+Provides: nodogsplash-files
+Replaces: nodogsplash, base-files
+Architecture: aarch64_cortex-a53
+Maintainer: TollGate <tollgate@tollgate.me>
+License: CC0-1.0
+Description: TollGate Basic Module for OpenWrt
+Filename: tollgate-wrt_v0.5.0-alpha3_aarch64_cortex-a53-upx-ultra-brute.ipk
+Size: 5321054
+SHA256sum: c508e0b51613a93731e56e4f9c2fd44134cb99a6d0bae3dcc39e1cc6d8a97fb3
+
+Package: tollgate-wrt
+Version: v0.5.0-alpha3
+Depends: nodogsplash, luci, jq
+Provides: nodogsplash-files
+Replaces: nodogsplash, base-files
+Architecture: aarch64_cortex-a53
+Maintainer: TollGate <tollgate@tollgate.me>
+License: CC0-1.0
+Description: TollGate Basic Module for OpenWrt
+Filename: tollgate-wrt_v0.5.0-alpha3_aarch64_cortex-a53-upx-ultra-brute.apk
+Size: 5307464
+SHA256sum: c9e09282b8e0ca8b0af45f388a317b995454bfcca71d1f1e6852b4b99dbbfe9f
+
+Package: tollgate-wrt
+Version: v0.5.0-alpha3
+Depends: nodogsplash, luci, jq
+Provides: nodogsplash-files
+Replaces: nodogsplash, base-files
+Architecture: aarch64_cortex-a53
+Maintainer: TollGate <tollgate@tollgate.me>
+License: CC0-1.0
+Description: TollGate Basic Module for OpenWrt
+Filename: tollgate-wrt_v0.5.0-alpha3_aarch64_cortex-a53.apk
+Size: 7153725
+SHA256sum: 5332bb5ea15edbef3a41d5a34cf0e5e66a8d0d9a152385d4e0a7f06e928e6f3d
+
