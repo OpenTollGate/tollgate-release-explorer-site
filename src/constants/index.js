@@ -1,3 +1,11 @@
+// Discovery tag: release events carry ["t","tollgate"] so implementations
+// can be found by tag instead of by a hardcoded author list.
+export const DISCOVERY_TAG = 'tollgate';
+
+// Test marker tag: events published while testing carry ["t","test"] and are
+// excluded from the default view (filterable out later).
+export const TEST_MARKER_TAG = 'test';
+
 // Default TollGate pubkey for releases
 export const DEFAULT_TOLLGATE_PUBKEY = '5075e61f0b048148b60105c1dd72bbeae1957336ae5824087e52efa374f8416a';
 
@@ -73,5 +81,6 @@ export const STORAGE_KEYS = {
   PUBLISHER_PUBKEY: 'tollgate_publisher_pubkey',
   VIEW_MODE: 'tollgate_view_mode',
   FILTERS: 'tollgate_filters',
-  DEDUPLICATE: 'tollgate_deduplicate'
+  DEDUPLICATE: 'tollgate_deduplicate',
+  SELECTED_PUBLISHERS: 'tollgate_selected_publishers'
 };

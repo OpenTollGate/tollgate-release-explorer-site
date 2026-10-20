@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { theme } from './styles/theme';
 import { VIEW_MODES, DEFAULT_FILTERS, PRODUCT_CATEGORIES, getProductsByCategory } from './constants';
 import NostrReleaseProvider from './contexts/NostrReleaseContext';
+import PublisherDiscoveryProvider from './contexts/PublisherDiscoveryContext';
 import Background from './components/common/Background';
 import Header from './components/layout/Header';
 import TabSelector from './components/common/TabSelector';
@@ -141,7 +142,8 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NostrReleaseProvider channelFilters={channelFilters}>
+      <PublisherDiscoveryProvider>
+        <NostrReleaseProvider channelFilters={channelFilters}>
         <AppContainer>
           <Background />
           <Header />
@@ -183,7 +185,8 @@ const App = () => {
             />
           </Routes>
         </AppContainer>
-      </NostrReleaseProvider>
+        </NostrReleaseProvider>
+      </PublisherDiscoveryProvider>
     </ThemeProvider>
   );
 };

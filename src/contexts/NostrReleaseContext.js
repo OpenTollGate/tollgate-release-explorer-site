@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { globalPool, globalEventStore } from './appleSauce';
-import { DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS } from '../constants';
+import { DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS, TEST_MARKER_TAG } from '../constants';
 import { mapEventsToStore } from 'applesauce-core';
 import { onlyEvents } from 'applesauce-relay';
+import { usePublisherDiscovery } from './PublisherDiscoveryContext';
 
 
 // Define the context type
@@ -12,6 +13,7 @@ const NostrReleaseContext = createContext({
   error: null,
   currentPubkey: DEFAULT_TOLLGATE_PUBKEY,
   setCurrentPubkey: () => {},
+  selectedPubkeys: [DEFAULT_TOLLGATE_PUBKEY],
   refetch: () => {}
 });
 
@@ -23,6 +25,24 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPubkey, setCurrentPubkey] = useState(DEFAULT_TOLLGATE_PUBKEY);
+  // Multi-publisher mode: when non-empty, the subscription uses this array
+  // instead of the single currentPubkey. When mounted inside
+  // PublisherDiscoveryProvider, the checkbox selection drives it; standalone
+  // usage falls back to the single official publisher.
+  const discovery = usePublisherDiscovery();
+  const discoverySelection = discovery && discovery.selectedPubkeys;
+  const [selectedPubkeys, setSelectedPubkeys] = useState(
+    (discoverySelection && discoverySelection.length > 0)
+      ? discoverySelection
+      : [DEFAULT_TOLLGATE_PUBKEY]
+  );
+
+  // Track the discovery selection while mounted inside the provider tree.
+  useEffect(() => {
+    if (discoverySelection && discoverySelection.length > 0) {
+      setSelectedPubkeys(discoverySelection);
+    }
+  }, [discoverySelection]);
   const [showEmptyState, setShowEmptyState] = useState(false);
   const subscriptionRef = useRef(null);
 
@@ -35,6 +55,13 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
         return this.tags?.filter(tag => tag[0] === tagName) || [];
       };
     }
+    
+    // Skip test-marked events: they carry ["t","test"] from pipeline tests
+    // and would pollute the release list.
+    const isTestEvent = (event.tags || []).some(
+      (t) => Array.isArray(t) && t[0] === 't' && t[1] === TEST_MARKER_TAG
+    );
+    if (isTestEvent) return;
     
     // Update releases array reactively
     setReleases(prevReleases => {
@@ -57,7 +84,8 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
 
   // Set up subscription when pubkey or channel filters change
   useEffect(() => {
-    if (!currentPubkey) return;
+    const authors = selectedPubkeys.length > 0 ? selectedPubkeys : [currentPubkey];
+    if (authors.length === 0 || authors.includes(null) || authors.includes(undefined)) return;
 
     const setupSubscription = () => {
       try {
@@ -78,10 +106,12 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
           }
         }
 
-        // Create filter for NIP-94 events from the specified publisher
+        // Create filter for NIP-94 events from the selected publishers.
+        // authors is a native Nostr multi-value filter, so checkbox
+        // selections collapse into ONE subscription.
         const filter = {
           kinds: [NIP94_KIND],
-          authors: [currentPubkey],
+          authors,
           limit: 5000
         };
 
@@ -158,7 +188,7 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
         }
       }
     };
-  }, [currentPubkey, channelFilters, handleReleaseEvent]);
+  }, [currentPubkey, selectedPubkeys, channelFilters, handleReleaseEvent]);
 
   // Function to manually refetch releases
   const refetch = useCallback(() => {
@@ -177,6 +207,8 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
     error,
     currentPubkey,
     setCurrentPubkey,
+    selectedPubkeys,
+    setSelectedPubkeys,
     refetch,
     showEmptyState
   };
