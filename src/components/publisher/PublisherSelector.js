@@ -1,21 +1,28 @@
 import React from 'react';
 import styled from 'styled-components';
 import { usePublisherDiscovery } from '../../contexts/PublisherDiscoveryContext';
-import { DEFAULT_TOLLGATE_PUBKEY } from '../../constants';
+import { DEFAULT_PUBLISHER_PUBKEYS, DEFAULT_TOLLGATE_PUBKEY, CI_PUBLISHER_PUBKEY } from '../../constants';
 import Button from '../common/Button';
 
 const PublisherSelector = () => {
   const { publishers, selectedPubkeys, togglePublisher, selectAll, clearAll, discoveryLoading } = usePublisherDiscovery();
 
-  const officialFirst = [
-    ...publishers.filter((p) => p.pubkey === DEFAULT_TOLLGATE_PUBKEY),
-    ...publishers.filter((p) => p.pubkey !== DEFAULT_TOLLGATE_PUBKEY)
-  ];
+  const publisherName = (pubkey) =>
+    pubkey === DEFAULT_TOLLGATE_PUBKEY ? 'TollGate (Official, GitHub-era)'
+      : pubkey === CI_PUBLISHER_PUBKEY ? 'TollGate CI (ngit release lane)'
+        : null;
 
-  const officialInList = publishers.some((p) => p.pubkey === DEFAULT_TOLLGATE_PUBKEY);
-  const rows = officialInList
-    ? officialFirst
-    : [{ pubkey: DEFAULT_TOLLGATE_PUBKEY, name: null, lastSeen: null }, ...officialFirst];
+  // Official keys first, in declared order; then discovered publishers.
+  const officialRows = DEFAULT_PUBLISHER_PUBKEYS
+    .filter((k) => !publishers.some((p) => p.pubkey === k))
+    .map((k) => ({ pubkey: k, name: publisherName(k), lastSeen: null }));
+  const rows = [
+    ...DEFAULT_PUBLISHER_PUBKEYS
+      .map((k) => publishers.find((p) => p.pubkey === k))
+      .filter(Boolean),
+    ...officialRows,
+    ...publishers.filter((p) => !DEFAULT_PUBLISHER_PUBKEYS.includes(p.pubkey))
+  ];
 
   return (
     <Container>
@@ -36,7 +43,6 @@ const PublisherSelector = () => {
       <List>
         {rows.map((p) => {
           const checked = selectedPubkeys.includes(p.pubkey);
-          const isOfficial = p.pubkey === DEFAULT_TOLLGATE_PUBKEY;
           return (
             <Row key={p.pubkey} $checked={checked}>
               <Checkbox
@@ -46,7 +52,7 @@ const PublisherSelector = () => {
                 id={`pub-${p.pubkey.slice(0, 12)}`}
               />
               <Label htmlFor={`pub-${p.pubkey.slice(0, 12)}`}>
-                <Name>{isOfficial ? 'TollGate (Official)' : (p.name || `${p.pubkey.slice(0, 16)}…`)}</Name>
+                <Name>{publisherName(p.pubkey) || (p.name || `${p.pubkey.slice(0, 16)}…`)}</Name>
                 <Key>{p.pubkey.slice(0, 24)}…</Key>
               </Label>
             </Row>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { globalPool, globalEventStore } from './appleSauce';
-import { DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS, TEST_MARKER_TAG } from '../constants';
+import { DEFAULT_PUBLISHER_PUBKEYS, DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS, TEST_MARKER_TAG } from '../constants';
 import { mapEventsToStore } from 'applesauce-core';
 import { onlyEvents } from 'applesauce-relay';
 import { usePublisherDiscovery } from './PublisherDiscoveryContext';
@@ -13,14 +13,14 @@ const NostrReleaseContext = createContext({
   error: null,
   currentPubkey: DEFAULT_TOLLGATE_PUBKEY,
   setCurrentPubkey: () => {},
-  selectedPubkeys: [DEFAULT_TOLLGATE_PUBKEY],
+  selectedPubkeys: DEFAULT_PUBLISHER_PUBKEYS,
   refetch: () => {}
 });
 
 // Custom hook to use the context
 export const useNostrReleases = () => useContext(NostrReleaseContext);
 
-const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
+const NostrReleaseProvider = ({ children, channelFilters = ['stable', 'beta', 'alpha', 'dev'] }) => {
   const [releases, setReleases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +34,7 @@ const NostrReleaseProvider = ({ children, channelFilters = ['stable'] }) => {
   const [selectedPubkeys, setSelectedPubkeys] = useState(
     (discoverySelection && discoverySelection.length > 0)
       ? discoverySelection
-      : [DEFAULT_TOLLGATE_PUBKEY]
+      : DEFAULT_PUBLISHER_PUBKEYS
   );
 
   // Track the discovery selection while mounted inside the provider tree.

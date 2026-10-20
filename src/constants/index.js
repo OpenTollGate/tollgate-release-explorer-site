@@ -6,8 +6,16 @@ export const DISCOVERY_TAG = 'tollgate';
 // excluded from the default view (filterable out later).
 export const TEST_MARKER_TAG = 'test';
 
-// Default TollGate pubkey for releases
+// Official publisher pubkeys for releases.
+// 5075e61f… is the legacy GitHub-Actions key: it signed every release until
+// org-wide Actions died on 2026-08-27 and its events are still the history
+// visitors may browse, so it stays known. 6cfc53c0… is the live ngit-ci
+// release key (NGIT_CI_SECRET_TMBG__NSEC_HEX on the CI host) that has signed
+// every release event since 2026-09-12. Both are selected by default so the
+// explorer resolves releases from whichever pipeline published them.
 export const DEFAULT_TOLLGATE_PUBKEY = '5075e61f0b048148b60105c1dd72bbeae1957336ae5824087e52efa374f8416a';
+export const CI_PUBLISHER_PUBKEY = '6cfc53c04bda7d58dd4dd0471d66f6a4ea7d3e123e78006e0e0c1abc1208ac0d';
+export const DEFAULT_PUBLISHER_PUBKEYS = [DEFAULT_TOLLGATE_PUBKEY, CI_PUBLISHER_PUBKEY];
 
 // NIP-94 kind for file metadata
 export const NIP94_KIND = 1063;
@@ -54,25 +62,28 @@ export const VIEW_MODES = {
 };
 
 // Default Nostr relays.
-// These are the public relays our release pipeline publishes to and
-// that stay reachable from the browser. nostr.mom is important because
-// it carries the full history without the 500-event cap damus/nos.lol
-// impose. relay1/relay2.orangesync.tech and relay.tollgate.me were added
-// to the publish pipeline for redundancy and also carry the full release
-// history. (relay.tollgate.me previously returned HTTP 525 from the
-// browser; its cert is fixed now.)
+// relay2.orangesync.tech and damus are the two relays measured reachable and
+// carrying our kind-1063 history today; relay2 has no meaningful event cap.
+// relay1.orangesync.tech points at a dead IP (66.92.204.38) and
+// relay.tollgate.me no longer completes a Nostr websocket behind Cloudflare —
+// both were measured dead from the browser path on 2026-10-20 and are removed
+// until they are actually fixed. nos.lol / nostr.mom keep flapping from this
+// network; they are kept as extras because browsers on other networks reach
+// them, but the default view no longer depends on them.
 export const DEFAULT_RELAYS = [
+  'wss://relay2.orangesync.tech',
   'wss://relay.damus.io',
   'wss://nos.lol',
-  'wss://nostr.mom',
-  'wss://relay.tollgate.me',
-  'wss://relay1.orangesync.tech',
-  'wss://relay2.orangesync.tech'
+  'wss://nostr.mom'
 ];
 
 // Filter defaults
 export const DEFAULT_FILTERS = {
-  channels: [RELEASE_CHANNELS.STABLE], // Default to stable only
+  // No release has ever carried c=stable — every published event today is
+  // dev or (for the staged v0.5.0-alpha3) alpha. Defaulting the channel
+  // filter to stable-only therefore showed an empty explorer. Show all
+  // channels by default until a real stable channel exists.
+  channels: [RELEASE_CHANNELS.STABLE, RELEASE_CHANNELS.BETA, RELEASE_CHANNELS.ALPHA, RELEASE_CHANNELS.DEV],
   products: [PRODUCT_TYPES.TOLLGATE_OS, PRODUCT_TYPES.TOLLGATE_WRT, PRODUCT_TYPES.TOLLGATE_BASIC]
 };
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { globalPool, globalEventStore } from './appleSauce';
-import { DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS, DISCOVERY_TAG } from '../constants';
+import { DEFAULT_PUBLISHER_PUBKEYS, DEFAULT_TOLLGATE_PUBKEY, NIP94_KIND, DEFAULT_RELAYS, DISCOVERY_TAG } from '../constants';
 import { onlyEvents } from 'applesauce-relay';
 
 const DISCOVERY_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h rolling window for tag-scoped discovery
@@ -19,7 +19,7 @@ export const usePublisherDiscovery = () => useContext(PublisherDiscoveryContext)
 export const PublisherDiscoveryProvider = ({ children }) => {
   const [publishers, setPublishers] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(true);
-  const [selectedPubkeys, setSelectedPubkeys] = useState([DEFAULT_TOLLGATE_PUBKEY]);
+  const [selectedPubkeys, setSelectedPubkeys] = useState(DEFAULT_PUBLISHER_PUBKEYS);
   const subscriptionRef = useRef(null);
 
   // Restore persisted selection, seeded with the official key
@@ -29,7 +29,9 @@ export const PublisherDiscoveryProvider = ({ children }) => {
       if (saved) {
         const arr = JSON.parse(saved);
         if (Array.isArray(arr) && arr.length > 0) {
-          setSelectedPubkeys(arr.includes(DEFAULT_TOLLGATE_PUBKEY) ? arr : [DEFAULT_TOLLGATE_PUBKEY, ...arr]);
+          // Union with the official set so a stored selection can never
+          // silently drop the CI publisher after an upgrade.
+          setSelectedPubkeys(Array.from(new Set([...DEFAULT_PUBLISHER_PUBKEYS, ...arr])));
         }
       }
     } catch (e) {
@@ -48,7 +50,7 @@ export const PublisherDiscoveryProvider = ({ children }) => {
       let next;
       if (prev.includes(pubkey)) {
         next = prev.filter((p) => p !== pubkey);
-        if (next.length === 0) next = [DEFAULT_TOLLGATE_PUBKEY];
+        if (next.length === 0) next = DEFAULT_PUBLISHER_PUBKEYS;
       } else {
         next = [...prev, pubkey];
       }
@@ -59,7 +61,7 @@ export const PublisherDiscoveryProvider = ({ children }) => {
 
   const selectAll = useCallback(() => {
     setSelectedPubkeys((prev) => {
-      const next = Array.from(new Set([DEFAULT_TOLLGATE_PUBKEY, ...publishers.map((p) => p.pubkey)]));
+      const next = Array.from(new Set([...DEFAULT_PUBLISHER_PUBKEYS, ...publishers.map((p) => p.pubkey)]));
       persistSelection(next);
       return next;
     });
@@ -67,8 +69,8 @@ export const PublisherDiscoveryProvider = ({ children }) => {
 
   const clearAll = useCallback(() => {
     setSelectedPubkeys(() => {
-      persistSelection([DEFAULT_TOLLGATE_PUBKEY]);
-      return [DEFAULT_TOLLGATE_PUBKEY];
+      persistSelection(DEFAULT_PUBLISHER_PUBKEYS);
+      return DEFAULT_PUBLISHER_PUBKEYS;
     });
   }, [persistSelection]);
 
