@@ -4,13 +4,16 @@ import styled from 'styled-components';
 import { useNostrReleases } from '../../contexts/NostrReleaseContext';
 import Button from '../common/Button';
 import PublisherModal from '../publisher/PublisherModal';
+import PublisherSelector from '../publisher/PublisherSelector';
 
 // Import logo
 import logoWhite from '../../assets/logo/TollGate_Logo-C-white.png';
 
 const Header = () => {
-  const { currentPubkey } = useNostrReleases();
+  const { currentPubkey, selectedPubkeys } = useNostrReleases();
   const [showPublisherModal, setShowPublisherModal] = useState(false);
+  const [showPublisherPanel, setShowPublisherPanel] = useState(false);
+  const selectedCount = (selectedPubkeys && selectedPubkeys.length) || 1;
   const navigate = useNavigate();
 
   const isDefaultPubkey = currentPubkey === '5075e61f0b048148b60105c1dd72bbeae1957336ae5824087e52efa374f8416a';
@@ -33,21 +36,36 @@ const Header = () => {
 
           <HeaderActions>
             <PublisherInfo>
-              <PublisherLabel>Publisher:</PublisherLabel>
+              <PublisherLabel>Publishers:</PublisherLabel>
               <PublisherValue>
-                {isDefaultPubkey ? 'TollGate (Official)' : `${currentPubkey.slice(0, 8)}...`}
+                {selectedCount === 1 && isDefaultPubkey
+                  ? 'TollGate (Official)'
+                  : `${selectedCount} selected`}
               </PublisherValue>
+              <SwitchButton
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPublisherPanel((v) => !v)}
+              >
+                Select
+              </SwitchButton>
               <SwitchButton
                 variant="outline"
                 size="sm"
                 onClick={() => setShowPublisherModal(true)}
               >
-                Switch Publisher
+                Manual
               </SwitchButton>
             </PublisherInfo>
           </HeaderActions>
         </HeaderContent>
       </HeaderContainer>
+
+      {showPublisherPanel && (
+        <PublisherDropdown>
+          <PublisherSelector />
+        </PublisherDropdown>
+      )}
 
       {showPublisherModal && (
         <PublisherModal onClose={() => setShowPublisherModal(false)} />
@@ -56,7 +74,22 @@ const Header = () => {
   );
 };
 
+const PublisherDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: ${props => props.theme.spacing.lg};
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background-color: rgba(26, 26, 46, 0.98);
+  border: 1px solid ${props => props.theme.colors.border};
+  border-radius: 8px;
+  min-width: 320px;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+`;
+
 const HeaderContainer = styled.header`
+  position: relative;
   background-color: rgba(26, 26, 46, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid ${props => props.theme.colors.border};
